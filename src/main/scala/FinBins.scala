@@ -1,4 +1,5 @@
-package gov.uk.ons.FinBins
+package uk.gov.ons.dsc.fin
+
 
 /**
   * Created by noyva on 03/05/2017.
@@ -10,6 +11,7 @@ import org.apache.spark.sql.types.StringType
 import org.apache.spark.sql.types.IntegerType
 import org.apache.spark.SparkConf
 import org.apache.spark.SparkContext
+import org.apache.spark.sql.functions.udf
 
 object FinBins {
 
@@ -80,6 +82,34 @@ object FinBins {
 
   //val fssIDBR = fss.join(idbr,fss("RUReference")===idbr("C0"))
 
+  println("No of fss records:"+fss.count())
+
+
+  def matchPC(PC1:String, PC2:String, PC3:String):Boolean = {
+    if (PC1 == null || PC2 == null || PC3 == null) {
+      false
+    }
+    else if (PC3.contains(PC1) && PC3.contains(PC2)) {
+      true
+    }
+    else {
+      false
+    }
   }
+
+    sqlContext.udf.register("matchPC",matchPC _)
+
+
+idbr.registerTempTable("idbr")
+firms.registerTempTable("firms")
+
+val firms_idbr = sqlContext.sql("SELECT IDBR.C37, FIRMS.NAME12, FIRMS.NAME13 FROM IDBR, FIRMS WHERE matchPC(FIRMS.NAME12, FIRMS.NAME13, IDBR.C37 )")
+
+    println("No of matching postcode records:"+firms_idbr.count())
+
+  }
+
+
+
 
 }
