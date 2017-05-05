@@ -1,3 +1,5 @@
+package gov.uk.ons.FinBins
+
 /**
   * Created by noyva on 03/05/2017.
   */
@@ -15,7 +17,9 @@ object FinBins {
   def main (args:Array[String]):Unit = {
 
     val appName = "FinBins"
-    val master = args(0)
+    //val master = args(0)
+    val master = "yarn-client"
+
 
     val conf = new SparkConf().setAppName(appName).setMaster(master)
     val sc: SparkContext = new SparkContext(conf)
