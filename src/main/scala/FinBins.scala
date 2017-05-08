@@ -89,7 +89,8 @@ object FinBins {
     if (PC1 == null || PC2 == null || PC3 == null) {
       false
     }
-    else if (PC3.replaceAll(" ","").toUpperCase == (PC1 + PC2).replaceAll(" ","").toUpperCase ) {
+   // else if (PC3.replaceAll(" ","").toUpperCase == (PC1 + PC2).replaceAll(" ","").toUpperCase ) {
+     else if ( PC3.contains(PC1) && PC3.contains(PC2) ) {
       true
     }
     else {
