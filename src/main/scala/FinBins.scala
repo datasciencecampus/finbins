@@ -12,6 +12,7 @@ import org.apache.spark.sql.types.IntegerType
 import org.apache.spark.SparkConf
 import org.apache.spark.SparkContext
 import org.apache.spark.sql.functions.udf
+import org.apache.spark.sql.functions.{concat, lit}
 
 object FinBins {
 
@@ -71,6 +72,10 @@ object FinBins {
 
   val firms = sqlContext.read.format("com.databricks.spark.csv").option("header","true").option("delimiter","|").schema(firmsSchema).load("firms.txt")
 
+  val getConcatenated = udf( (first: String, second: String) => { first + " " + second } )
+
+  val firms1 = firms.withColumn("PostCode", getConcatenated(firms.col("name12"), firms.col("name13") ))
+
   val perms= sqlContext.read.format("com.databricks.spark.csv").option("header","true").option("delimiter","|").schema(permSchema).load("perm.txt")
 
   val firmPerm = perms.join(firms,"firmId").sort("firmId")
@@ -85,12 +90,14 @@ object FinBins {
   println("No of fss records:"+fss.count())
 
 
+
+
   def matchPC(PC1:String, PC2:String, PC3:String):Boolean = {
     if (PC1 == null || PC2 == null || PC3 == null) {
       false
     }
    // else if (PC3.replaceAll(" ","").toUpperCase == (PC1 + PC2).replaceAll(" ","").toUpperCase ) {
-     else if ( PC3.contains(PC1) && PC3.contains(PC2) ) {
+     else if ( PC3.contains(PC1.trim) && PC3.contains(PC2.trim) ) {
       true
     }
     else {
@@ -122,10 +129,12 @@ object FinBins {
     sqlContext.udf.register("matchName",matchPC _)
 
 
-idbr.registerTempTable("IDBR")
-firms.registerTempTable("FIRMS")
+    idbr.registerTempTable("IDBR")
+    firms1.registerTempTable("FIRMS")
 
-    val firms_idbr1 = sqlContext.sql("SELECT IDBR.C37, FIRMS.name12, FIRMS.name13 FROM IDBR, FIRMS WHERE matchPC(FIRMS.name12, FIRMS.name13, IDBR.C37 )")
+    //val firms_idbr1 = sqlContext.sql("SELECT IDBR.C37, FIRMS.name12, FIRMS.name13 FROM IDBR, FIRMS WHERE matchPC(FIRMS.name12, FIRMS.name13, IDBR.C37 )")
+
+    val firms_idbr1 = sqlContext.sql("SELECT IDBR.C37, FIRMS.name12, FIRMS.name13 FROM IDBR JOIN FIRMS ON IDBR.C37 = FIRMS.PostCode")
 
     println("No of rec with matching postcode records:"+firms_idbr1.count())
 
