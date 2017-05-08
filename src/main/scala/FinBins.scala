@@ -124,15 +124,15 @@ object FinBins {
 idbr.registerTempTable("IDBR")
 firms.registerTempTable("FIRMS")
 
-    val firms_idbr1 = sqlContext.sql("SELECT IDBR.C37, FIRMS.NAME12, FIRMS.NAME13 FROM IDBR, FIRMS WHERE matchPC(FIRMS.NAME12, FIRMS.NAME13, IDBR.C37 )")
+    val firms_idbr1 = sqlContext.sql("SELECT IDBR.C37, FIRMS.name12, FIRMS.name13 FROM IDBR, FIRMS WHERE matchPC(FIRMS.name12, FIRMS.name13, IDBR.C37 )")
 
     println("No of rec with matching postcode records:"+firms_idbr1.count())
 
-    val firms_idbr2 = sqlContext.sql("SELECT IDBR.C37, FIRMS.NAME12, FIRMS.NAME13 FROM IDBR, FIRMS WHERE matchPC(FIRMS.NAME12, FIRMS.NAME13, IDBR.C37 ) AND matchAddr (FIRMS.NAME12, FIRMS.NAME13) ")
+    val firms_idbr2 = sqlContext.sql("SELECT IDBR.C37, FIRMS.name12, FIRMS.name13 FROM IDBR, FIRMS WHERE matchPC(FIRMS.name12, FIRMS.name13, IDBR.C37 ) AND matchAddr (FIRMS.name12, FIRMS.name13) ")
 
     println("No of rec with matching postcode and address records:"+firms_idbr2.count())
 
-    val firms_idbr3 = sqlContext.sql("SELECT IDBR.C37, FIRMS.NAME12, FIRMS.NAME13 FROM IDBR, FIRMS WHERE matchPC(FIRMS.NAME12, FIRMS.NAME13, IDBR.C37 ) AND matchAddr (FIRMS.NAME12, FIRMS.NAME13) AND  matchName (FIRMS.NAME12, FIRMS.NAME13)")
+    val firms_idbr3 = sqlContext.sql("SELECT IDBR.C37, FIRMS.name12, FIRMS.name13 FROM IDBR, FIRMS WHERE matchPC(FIRMS.name12, FIRMS.name13, IDBR.C37 ) AND matchAddr (FIRMS.name12, FIRMS.name13) AND  matchName (FIRMS.name12, FIRMS.name13)")
 
     println("No of rec with matching postcode, address and name records:"+firms_idbr3.count())
 
