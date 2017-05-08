@@ -89,7 +89,7 @@ object FinBins {
     if (PC1 == null || PC2 == null || PC3 == null) {
       false
     }
-    else if (PC3.contains(PC1) && PC3.contains(PC2)) {
+    else if (PC3.trim == PC1.trim() + PC2.trim() ) {
       true
     }
     else {
@@ -106,6 +106,8 @@ firms.registerTempTable("firms")
 val firms_idbr = sqlContext.sql("SELECT IDBR.C37, FIRMS.NAME12, FIRMS.NAME13 FROM IDBR, FIRMS WHERE matchPC(FIRMS.NAME12, FIRMS.NAME13, IDBR.C37 )")
 
     println("No of matching postcode records:"+firms_idbr.count())
+
+    firms_idbr.show()
 
   }
 
