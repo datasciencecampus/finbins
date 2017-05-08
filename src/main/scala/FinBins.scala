@@ -72,22 +72,25 @@ object FinBins {
 
   val firms = sqlContext.read.format("com.databricks.spark.csv").option("header","true").option("delimiter","|").schema(firmsSchema).load("firms.txt")
 
-  val getConcatenated = udf( (first: String, second: String) => { first + " " + second } )
+  val getConcatenated = udf( (first: String, second: String) => { first.trim + " " + second.trim } )
 
   val firms1 = firms.withColumn("PostCode", getConcatenated(firms.col("name12"), firms.col("name13") ))
+  println("No of FCA firms records:"+firms1.count())
 
   val perms= sqlContext.read.format("com.databricks.spark.csv").option("header","true").option("delimiter","|").schema(permSchema).load("perm.txt")
 
-  val firmPerm = perms.join(firms,"firmId").sort("firmId")
+  //val firmPerm = perms.join(firms1,"firmId").sort("firmId")
 
 
   val idbr= sqlContext.read.format("com.databricks.spark.csv").option("header","false").option("delimiter",":").option("inferSchema","true").load("IDBR_266.txt")
+  println("No of IDBR records:"+idbr.count())
 
   val fss=  sqlContext.read.format("com.databricks.spark.csv").option("header","true").option("delimiter","|").option("inferSchema","true").load("fss.txt")
 
   //val fssIDBR = fss.join(idbr,fss("RUReference")===idbr("C0"))
 
   println("No of fss records:"+fss.count())
+
 
 
 
@@ -125,8 +128,8 @@ object FinBins {
    }
 
     sqlContext.udf.register("matchPC",matchPC _)
-    sqlContext.udf.register("matchAddr",matchPC _)
-    sqlContext.udf.register("matchName",matchPC _)
+   // sqlContext.udf.register("matchAddr",matchPC _)
+   // sqlContext.udf.register("matchName",matchPC _)
 
 
     idbr.registerTempTable("IDBR")
@@ -138,7 +141,7 @@ object FinBins {
 
     println("No of rec with matching postcode records:"+firms_idbr1.count())
 
-    val firms_idbr2 = sqlContext.sql("SELECT IDBR.C37, FIRMS.name12, FIRMS.name13 FROM IDBR, FIRMS WHERE matchPC(FIRMS.name12, FIRMS.name13, IDBR.C37 ) AND matchAddr (FIRMS.name12, FIRMS.name13) ")
+   /* val firms_idbr2 = sqlContext.sql("SELECT IDBR.C37, FIRMS.name12, FIRMS.name13 FROM IDBR, FIRMS WHERE matchPC(FIRMS.name12, FIRMS.name13, IDBR.C37 ) AND matchAddr (FIRMS.name12, FIRMS.name13) ")
 
     println("No of rec with matching postcode and address records:"+firms_idbr2.count())
 
@@ -146,8 +149,12 @@ object FinBins {
 
     println("No of rec with matching postcode, address and name records:"+firms_idbr3.count())
 
+*/
 
 
+    val evalAddr = udf( (addr1:String, addr2:String) => {1.0})
+    val evalName = udf ( (name1:String, name2:String) => {1.0}  )
+    val firms_idbr2 = firms_idbr1.withColumn("AddrMatch",evalAddr(firms_idbr1.col("name3"),firms_idbr1.col("name3"))).withColumn("NameMatch",evalName(firms_idbr1.col("name3"),firms_idbr1.col("name3")))
 
 
   }
