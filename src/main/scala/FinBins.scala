@@ -89,7 +89,7 @@ object FinBins {
     if (PC1 == null || PC2 == null || PC3 == null) {
       false
     }
-    else if (PC3.trim == PC1.trim() + PC2.trim() ) {
+    else if (PC3.replaceAll(" ","").toUpperCase == (PC1 + PC2).replaceAll(" ","").toUpperCase ) {
       true
     }
     else {
@@ -97,17 +97,46 @@ object FinBins {
     }
   }
 
+
+   def matchAddress(Addr1:String, Addr2:String) :Boolean = {
+
+     if (Addr1.replaceAll(" ","").toUpperCase == Addr2.replaceAll(" ","").toUpperCase) {
+       true
+     } else {
+       false
+     }
+   }
+
+
+   def matchName (Name1:String, Name2:String) :Boolean = {
+     if (Name1.replaceAll(" ","").toUpperCase == Name2.replaceAll(" ","").toUpperCase) {
+       true
+     } else {
+       false
+     }
+   }
+
     sqlContext.udf.register("matchPC",matchPC _)
 
 
 idbr.registerTempTable("IDBR")
 firms.registerTempTable("FIRMS")
 
-val firms_idbr = sqlContext.sql("SELECT IDBR.C37, FIRMS.NAME12, FIRMS.NAME13 FROM IDBR, FIRMS WHERE matchPC(FIRMS.NAME12, FIRMS.NAME13, IDBR.C37 )")
+    val firms_idbr1 = sqlContext.sql("SELECT IDBR.C37, FIRMS.NAME12, FIRMS.NAME13 FROM IDBR, FIRMS WHERE matchPC(FIRMS.NAME12, FIRMS.NAME13, IDBR.C37 )")
 
-    println("No of matching postcode records:"+firms_idbr.count())
+    println("No of rec with matching postcode records:"+firms_idbr1.count())
 
-    firms_idbr.show()
+    val firms_idbr2 = sqlContext.sql("SELECT IDBR.C37, FIRMS.NAME12, FIRMS.NAME13 FROM IDBR, FIRMS WHERE matchPC(FIRMS.NAME12, FIRMS.NAME13, IDBR.C37 )")
+
+    println("No of rec with matching postcode and address records:"+firms_idbr2.count())
+
+    val firms_idbr3 = sqlContext.sql("SELECT IDBR.C37, FIRMS.NAME12, FIRMS.NAME13 FROM IDBR, FIRMS WHERE matchPC(FIRMS.NAME12, FIRMS.NAME13, IDBR.C37 )")
+
+    println("No of rec with matching postcode, address and name records:"+firms_idbr3.count())
+
+
+
+
 
   }
 
