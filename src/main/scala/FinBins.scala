@@ -98,7 +98,7 @@ object FinBins {
   }
 
 
-   def matchAddress(Addr1:String, Addr2:String) :Boolean = {
+   def matchAddr(Addr1:String, Addr2:String) :Boolean = {
 
      if (Addr1.replaceAll(" ","").toUpperCase == Addr2.replaceAll(" ","").toUpperCase) {
        true
@@ -117,6 +117,8 @@ object FinBins {
    }
 
     sqlContext.udf.register("matchPC",matchPC _)
+    sqlContext.udf.register("matchAddr",matchPC _)
+    sqlContext.udf.register("matchName",matchPC _)
 
 
 idbr.registerTempTable("IDBR")
@@ -126,11 +128,11 @@ firms.registerTempTable("FIRMS")
 
     println("No of rec with matching postcode records:"+firms_idbr1.count())
 
-    val firms_idbr2 = sqlContext.sql("SELECT IDBR.C37, FIRMS.NAME12, FIRMS.NAME13 FROM IDBR, FIRMS WHERE matchPC(FIRMS.NAME12, FIRMS.NAME13, IDBR.C37 )")
+    val firms_idbr2 = sqlContext.sql("SELECT IDBR.C37, FIRMS.NAME12, FIRMS.NAME13 FROM IDBR, FIRMS WHERE matchPC(FIRMS.NAME12, FIRMS.NAME13, IDBR.C37 ) AND matchAddr (FIRMS.NAME12, FIRMS.NAME13) ")
 
     println("No of rec with matching postcode and address records:"+firms_idbr2.count())
 
-    val firms_idbr3 = sqlContext.sql("SELECT IDBR.C37, FIRMS.NAME12, FIRMS.NAME13 FROM IDBR, FIRMS WHERE matchPC(FIRMS.NAME12, FIRMS.NAME13, IDBR.C37 )")
+    val firms_idbr3 = sqlContext.sql("SELECT IDBR.C37, FIRMS.NAME12, FIRMS.NAME13 FROM IDBR, FIRMS WHERE matchPC(FIRMS.NAME12, FIRMS.NAME13, IDBR.C37 ) AND matchAddr (FIRMS.NAME12, FIRMS.NAME13) AND  matchName (FIRMS.NAME12, FIRMS.NAME13)")
 
     println("No of rec with matching postcode, address and name records:"+firms_idbr3.count())
 
