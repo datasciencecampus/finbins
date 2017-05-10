@@ -13,6 +13,9 @@ import org.apache.spark.SparkConf
 import org.apache.spark.SparkContext
 import org.apache.spark.sql.functions.udf
 import org.apache.spark.sql.functions.{concat, lit}
+import com.rockymadden.stringmetric.StringMetric
+
+
 
 object FinBins {
 
@@ -119,11 +122,13 @@ object FinBins {
    }
 
 
-   def matchName (Name1:String, Name2:String) :Boolean = {
-     if (Name1.replaceAll(" ","").toUpperCase == Name2.replaceAll(" ","").toUpperCase) {
-       true
+   def matchName (Name1:String, Name2:String) :Int = {
+     if (Name1 == null || Name2 == null) {
+       0
      } else {
-       false
+       val dist =  StringMetric.compareWithLevenshtein(Name1.toCharArray, Name2.toCharArray)
+       println (Name1 + " " + Name2 + ":" + dist)
+       dist.get
      }
    }
 
@@ -150,13 +155,15 @@ object FinBins {
     println("No of rec with matching postcode, address and name records:"+firms_idbr3.count())
 
 */
-
+    println("Test of matchName:"+ matchName("abv","abc"))
 
     val evalAddr = udf( (addr1:String, addr2:String) => {1.0})
     val evalName = udf ( (name1:String, name2:String) => {1.0}  )
-    val firms_idbr2 = firms_idbr1.withColumn("AddrMatch",evalAddr(firms_idbr1.col("name3"),firms_idbr1.col("name3"))).withColumn("NameMatch",evalName(firms_idbr1.col("name3"),firms_idbr1.col("name3")))
+    val firms_idbr2 = firms_idbr1.withColumn("AddrMatch",evalAddr(firms_idbr1.col("name3"),firms_idbr1.col("name3"))).withColumn("NameMatch",evalName(firms_idbr1.col("C27"),firms_idbr1.col("name2")))
 
 
+
+    val val1 = ("sitting", "kitten")
   }
 
 

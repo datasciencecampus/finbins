@@ -5,12 +5,12 @@ lazy val root = (project in file(".")).
         name := "FinBins",
         version := "1.0",
         scalaVersion := "2.10.5",
-        mainClass in Compile := Some ("gov.uk.ons.DSC.Fin.FinBins")
+        mainClass in Compile := Some ("uk.gov.ons.dsc.fin.FinBins")
 
 
       )
 
-//libraryDependencies += "com.databricks" %% "spark-csv_2.10" % "1.5.0"
+/*libraryDependencies += "com.rockymadden.stringmetric" %% "stringmetric-core" % "0.27.4" */
 
 libraryDependencies ++= Seq(
   "org.apache.spark" %% "spark-core" % "1.6.0" % "provided",
