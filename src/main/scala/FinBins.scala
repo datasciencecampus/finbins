@@ -140,9 +140,11 @@ object FinBins {
     idbr.registerTempTable("IDBR")
     firms1.registerTempTable("FIRMS")
 
-    //val firms_idbr1 = sqlContext.sql("SELECT IDBR.C37, FIRMS.name12, FIRMS.name13 FROM IDBR, FIRMS WHERE matchPC(FIRMS.name12, FIRMS.name13, IDBR.C37 )")
+    println("Test of matchName:"+ matchName("abv","abc"))
 
-    val firms_idbr1 = sqlContext.sql("SELECT IDBR.C37, FIRMS.name12, FIRMS.name13 FROM IDBR JOIN FIRMS ON IDBR.C37 = FIRMS.PostCode")
+    val firms_idbr1 = sqlContext.sql("SELECT IDBR.C37, FIRMS.name12, FIRMS.name13 FROM IDBR, FIRMS WHERE matchPC(FIRMS.name12, FIRMS.name13, IDBR.C37 )")
+
+   // val firms_idbr1 = sqlContext.sql("SELECT IDBR.C37, FIRMS.name12, FIRMS.name13 FROM IDBR JOIN FIRMS ON IDBR.C37 = FIRMS.PostCode")
 
     println("No of rec with matching postcode records:"+firms_idbr1.count())
 
@@ -155,7 +157,7 @@ object FinBins {
     println("No of rec with matching postcode, address and name records:"+firms_idbr3.count())
 
 */
-    println("Test of matchName:"+ matchName("abv","abc"))
+
 
     val evalAddr = udf( (addr1:String, addr2:String) => {1.0})
     val evalName = udf ( (name1:String, name2:String) => {1.0}  )
