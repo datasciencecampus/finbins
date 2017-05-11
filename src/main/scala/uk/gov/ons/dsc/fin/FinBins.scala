@@ -136,7 +136,9 @@ object FinBins {
 
     println("Test of matchName:"+ matchName("abv","abc"))
 
-    val firms_idbr1 = sqlContext.sql("SELECT IDBR.C37, FIRMS.name12, FIRMS.name13 FROM IDBR, FIRMS WHERE matchPC(FIRMS.name12, FIRMS.name13, IDBR.C37 )")
+   // val firms_idbr1 = sqlContext.sql("SELECT IDBR.C37, FIRMS.name12, FIRMS.name13 , FIRMS.name2 , IDBR.C27 , FIRMS.name3 ,  FROM IDBR, FIRMS WHERE matchPC(FIRMS.name12, FIRMS.name13, IDBR.C37 )")
+
+    val firms_idbr1 = sqlContext.sql("SELECT * FROM IDBR, FIRMS WHERE matchPC(FIRMS.name12, FIRMS.name13, IDBR.C37 )")
 
    // val firms_idbr1 = sqlContext.sql("SELECT IDBR.C37, FIRMS.name12, FIRMS.name13 FROM IDBR JOIN FIRMS ON IDBR.C37 = FIRMS.PostCode")
 
@@ -157,9 +159,10 @@ object FinBins {
     val evalName = udf ( (name1:String, name2:String) => {1.0}  )
     val firms_idbr2 = firms_idbr1.withColumn("AddrMatch",evalAddr(firms_idbr1.col("name3"),firms_idbr1.col("name3"))).withColumn("NameMatch",evalName(firms_idbr1.col("C27"),firms_idbr1.col("name2")))
 
+    firms_idbr2.show(60)
 
+    firms_idbr2.write.save("/finbins_data/parquet")
 
-    val val1 = ("sitting", "kitten")
   }
 
 
