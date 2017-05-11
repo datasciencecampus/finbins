@@ -134,7 +134,7 @@ object FinBins {
     idbr.registerTempTable("IDBR")
     firms1.registerTempTable("FIRMS")
 
-    println("Test of matchName:"+ matchName("abv","abc"))
+    println("Test of matchName:"+ matchName("abv","abcd"))
 
    // val firms_idbr1 = sqlContext.sql("SELECT IDBR.C37, FIRMS.name12, FIRMS.name13 , FIRMS.name2 , IDBR.C27 , FIRMS.name3 ,  FROM IDBR, FIRMS WHERE matchPC(FIRMS.name12, FIRMS.name13, IDBR.C37 )")
 
@@ -154,17 +154,21 @@ object FinBins {
 
 */
 
+    firms_idbr1.write.save("/finbins_data/parquet")
 
     val evalAddr = udf( (addr1:String, addr2:String) => {1.0})
     val evalName = udf ( (name1:String, name2:String) => {matchName(name1,name2)}  )
 
 
     val firms_idbr2 = firms_idbr1.withColumn("AddrMatch",evalAddr(firms_idbr1.col("name3"),firms_idbr1.col("name3")))
-                                 .withColumn("NameMatchScore", evalName(firms_idbr1.col("C27"),firms_idbr1.col("name2")))
 
-    firms_idbr2.show(60)
+    println("No of rec with matching address records:"+firms_idbr2.count())
 
-    firms_idbr2.write.save("/finbins_data/parquet")
+    val firms_idbr3 = firms_idbr2.withColumn("NameMatchScore", evalName(firms_idbr1.col("C27"),firms_idbr1.col("name2")))
+
+    println("No of rec with matching name records:"+firms_idbr3.count())
+
+
 
   }
 
