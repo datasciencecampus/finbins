@@ -1,19 +1,13 @@
 package uk.gov.ons.dsc.fin
 
-
 /**
   * Created by noyva on 03/05/2017.
   */
 
-import org.apache.spark.sql.types.StructType
-import org.apache.spark.sql.types.StructField
-import org.apache.spark.sql.types.StringType
-import org.apache.spark.sql.types.IntegerType
-import org.apache.spark.SparkConf
-import org.apache.spark.SparkContext
+import uk.gov.ons.dsc.utils.stringmetric.StringMetric
 import org.apache.spark.sql.functions.udf
-import org.apache.spark.sql.functions.{concat, lit}
-import com.rockymadden.stringmetric.StringMetric
+import org.apache.spark.sql.types.{IntegerType, StringType, StructField, StructType}
+import org.apache.spark.{SparkConf, SparkContext}
 
 
 
