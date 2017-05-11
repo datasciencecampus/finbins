@@ -156,8 +156,11 @@ object FinBins {
 
 
     val evalAddr = udf( (addr1:String, addr2:String) => {1.0})
-    val evalName = udf ( (name1:String, name2:String) => {1.0}  )
-    val firms_idbr2 = firms_idbr1.withColumn("AddrMatch",evalAddr(firms_idbr1.col("name3"),firms_idbr1.col("name3"))).withColumn("NameMatch",evalName(firms_idbr1.col("C27"),firms_idbr1.col("name2")))
+    val evalName = udf ( (name1:String, name2:String) => {matchName(name1,name2)}  )
+
+
+    val firms_idbr2 = firms_idbr1.withColumn("AddrMatch",evalAddr(firms_idbr1.col("name3"),firms_idbr1.col("name3")))
+                                 .withColumn("NameMatchScore", evalName(firms_idbr1.col("C27"),firms_idbr1.col("name2")))
 
     firms_idbr2.show(60)
 
