@@ -27,7 +27,7 @@ object FinBins {
 
     val fssSchema = StructType(Array(
       StructField("InquiryIDBRCode",StringType,true),StructField("IDBRPeriod",StringType,true),
-      StructField("RUReference",IntegerType,false),StructField("FormStatus",StringType,true),
+      StructField("RUReference",StringType,false),StructField("FormStatus",StringType,true),
       StructField("Update",StringType,true),StructField("Emplyees",IntegerType,true),
       StructField("DataSource",StringType,true),StructField("FormType",StringType,true),
       StructField("ReceiptDate",StringType,true),StructField("Region",StringType,true),
@@ -173,7 +173,7 @@ object FinBins {
 
 
 
-  val df = sqlContext.read.format("com.databricks.spark.csv").option("header","true").option("drop","true").option("NODE","DROPMALFORMED").schema(fssSchema).load("fss.txt")
+  val df = sqlContext.read.format("com.databricks.spark.csv").option("header","true").option("drop","true").option("NODE","DROPMALFORMED").option("quote","'").schema(fssSchema).load("fss.txt")
 
     df.write.save("fss1")
 
