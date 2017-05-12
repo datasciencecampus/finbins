@@ -173,7 +173,7 @@ object FinBins {
 
 
 
-  val df = sqlContext.read.format("com.databricks.spark.csv").option("header","true").load("fss.txt")
+  val df = sqlContext.read.format("com.databricks.spark.csv").option("header","true").schema(fssSchema).load("fss.txt")
 
     df.write.save("fss1")
 
