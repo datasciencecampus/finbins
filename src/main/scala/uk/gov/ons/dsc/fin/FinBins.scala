@@ -183,7 +183,7 @@ object FinBins {
 
 
     def concCols(col1:String, col2:String):String = {
-      if (col1 == null || col1 == null) {
+      if (col1 == null || col2 == null) {
         ""
       }
 
