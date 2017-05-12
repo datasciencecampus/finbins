@@ -181,7 +181,7 @@ object FinBins {
 
     firms.write.save("firms0")
 
-  val getConcatenated = udf( (first: String, second: String) => { first.trim + " " + second.trim } )
+  val getConcatenated = udf( (first: Option[String], second: Option[String]) => { first.getOrElse("")  + " " + second.getOrElse("") } )
 
   val firms1 = firms.withColumn("PostCode", getConcatenated(firms.col("name12"), firms.col("name13") ))
   println("No of FCA firms records:"+firms1.count())
