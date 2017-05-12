@@ -28,17 +28,17 @@ object FinBins {
     val fssSchema = StructType(Array(
       StructField("InquiryIDBRCode",StringType,true),StructField("IDBRPeriod",StringType,true),
       StructField("RUReference",IntegerType,false),StructField("FormStatus",StringType,true),
-      StructField("Update",StringType,true),StructField("Emplyees",StringType,true),
+      StructField("Update",StringType,true),StructField("Emplyees",IntegerType,true),
       StructField("DataSource",StringType,true),StructField("FormType",StringType,true),
       StructField("ReceiptDate",StringType,true),StructField("Region",StringType,true),
-      StructField("CellCelection",StringType,true),StructField("CurrentSIC",StringType,true),
+      StructField("CellSelection",StringType,true),StructField("CurrentSIC",StringType,true),
       StructField("Turnover",StringType,true),StructField("Instance",StringType,true),
       StructField("KeyContributor",StringType,true),
-      StructField("q0001",StringType,true),StructField("q0002",StringType,true),StructField("q0100",StringType,true),
+      StructField("q0001",StringType,true),StructField("q0002",StringType,true),StructField("q003",StringType,true),StructField("q0100",StringType,true),
       StructField("q0101",StringType,true),StructField("q0102",StringType,true),StructField("q0103",StringType,true),
       StructField("q0104",StringType,true),StructField("q0105",StringType,true),StructField("q0106",StringType,true),
       StructField("q0107",StringType,true),StructField("q0108",StringType,true),StructField("q0109",StringType,true),
-      StructField("q0110",StringType,true),StructField("q0111",StringType,true),StructField("q0112",StringType,true),
+      StructField("q0110",StringType,true),StructField("q0111",StringType,true),StructField("q0112",StringType,true),StructField("q0113",StringType,true),
       StructField("q0114",StringType,true),StructField("q0115",StringType,true),StructField("q0116",StringType,true),
       StructField("q0117",StringType,true),StructField("q0118",StringType,true),StructField("q0119",StringType,true),
       StructField("q0120",StringType,true),StructField("q0121",StringType,true),StructField("q0122",StringType,true),
@@ -81,7 +81,7 @@ object FinBins {
       StructField("q1107",StringType,true),StructField("q1108",StringType,true),StructField("q1109",StringType,true),
       StructField("q1110",StringType,true),StructField("q1111",StringType,true),StructField("q1112",StringType,true),
       StructField("q1119",StringType,true),StructField("q1120",StringType,true),StructField("q1121",StringType,true),
-      StructField("q1122",StringType,true),StructField("q1123",StringType,true),StructField("q1124",StringType,true),
+      StructField("q1123",StringType,true),StructField("q1124",StringType,true),
       StructField("q1125",StringType,true),StructField("q1126",StringType,true),StructField("q1127",StringType,true),
       StructField("q1128",StringType,true),StructField("q1129",StringType,true),StructField("q2000",StringType,true),
       StructField("q2001",StringType,true),StructField("q2002",StringType,true),StructField("q2003",StringType,true),
@@ -173,7 +173,7 @@ object FinBins {
 
 
 
-  val df = sqlContext.read.format("com.databricks.spark.csv").option("header","true").schema(fssSchema).load("fss.txt")
+  val df = sqlContext.read.format("com.databricks.spark.csv").option("header","true").option("drop","true").option("NODE","DROPMALFORMED").schema(fssSchema).load("fss.txt")
 
     df.write.save("fss1")
 
