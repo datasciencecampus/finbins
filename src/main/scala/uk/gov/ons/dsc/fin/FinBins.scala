@@ -154,7 +154,7 @@ object FinBins {
 
 */
 
-    firms_idbr1.write.save("/finbins_data/parquet")
+    firms_idbr1.write.save("finbins_data/parquet")
 
     val evalAddr = udf( (addr1:String, addr2:String) => {1.0})
     val evalName = udf ( (name1:String, name2:String) => {matchName(name1,name2)}  )
