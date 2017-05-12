@@ -67,22 +67,30 @@ object FinBins {
 
   val df = sqlContext.read.format("com.databricks.spark.csv").option("header","true").load("fss.txt")
 
+    df.write.save("fss1")
+
   val firms = sqlContext.read.format("com.databricks.spark.csv").option("header","true").option("delimiter","|").schema(firmsSchema).load("firms.txt")
+
+    firms.write.save("firms0")
 
   val getConcatenated = udf( (first: String, second: String) => { first.trim + " " + second.trim } )
 
   val firms1 = firms.withColumn("PostCode", getConcatenated(firms.col("name12"), firms.col("name13") ))
   println("No of FCA firms records:"+firms1.count())
+    firms1.write.save("firms1")
 
   val perms= sqlContext.read.format("com.databricks.spark.csv").option("header","true").option("delimiter","|").schema(permSchema).load("perm.txt")
 
   //val firmPerm = perms.join(firms1,"firmId").sort("firmId")
+    perms.write.save("perms")
 
 
   val idbr= sqlContext.read.format("com.databricks.spark.csv").option("header","false").option("delimiter",":").option("inferSchema","true").load("IDBR_266.txt")
   println("No of IDBR records:"+idbr.count())
 
+    idbr.write.save("idbr0")
   val fss=  sqlContext.read.format("com.databricks.spark.csv").option("header","true").option("delimiter","|").option("inferSchema","true").load("fss.txt")
+    fss.write.save("fss0")
 
   //val fssIDBR = fss.join(idbr,fss("RUReference")===idbr("C0"))
 
@@ -154,7 +162,7 @@ object FinBins {
 
 */
 
-    firms_idbr1.write.save("idbr1")
+    firms_idbr1.write.save("firms_idbr1")
 
     val evalAddr = udf( (addr1:String, addr2:String) => {1.0})
     val evalName = udf ( (name1:String, name2:String) => {matchName(name1,name2)}  )
