@@ -253,6 +253,10 @@ object FinBins {
      }
    }
 
+
+
+
+
     sqlContext.udf.register("matchPC",matchPC _)
    // sqlContext.udf.register("matchAddr",matchPC _)
    // sqlContext.udf.register("matchName",matchPC _)
@@ -261,7 +265,7 @@ object FinBins {
     idbr.registerTempTable("IDBR")
     firms1.registerTempTable("FIRMS")
 
-    println("Test of matchName:"+ matchName("abv","abcd"))
+    //println("Test of matchName:"+ matchName("abv","abcd"))
 
    // val firms_idbr1 = sqlContext.sql("SELECT IDBR.C37, FIRMS.name12, FIRMS.name13 , FIRMS.name2 , IDBR.C27 , FIRMS.name3 ,  FROM IDBR, FIRMS WHERE matchPC(FIRMS.name12, FIRMS.name13, IDBR.C37 )")
 
