@@ -275,7 +275,7 @@ object FinBins {
 
     println("No of rec with matching postcode records:"+firms_idbr1.count())
 
-   /* val firms_idbr2 = sqlContext.sql("SELECT IDBR.C37, FIRMS.name12, FIRMS.name13 FROM IDBR, FIRMS WHERE matchPC(FIRMS.name12, FIRMS.name13, IDBR.C37 ) AND matchAddr (FIRMS.name12, FIRMS.name13) ")
+   /* val firms_idbr2 = sqlContext.sql("SELECT IDBR.C37, FIRMS.name12, FIRMS.name13 FROM IDBR, FIRMS WHERE matchPC(FIRMS.name12, FIRMS.name13, IDBR.C37 ) AND matchAddr (FIRMS.name6, IDBR.C32) ")
 
     println("No of rec with matching postcode and address records:"+firms_idbr2.count())
 
