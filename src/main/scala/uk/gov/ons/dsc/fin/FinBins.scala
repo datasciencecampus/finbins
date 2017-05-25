@@ -183,7 +183,7 @@ object FinBins {
 
   val firms = sqlContext.read.format("com.databricks.spark.csv").option("header","true").option("delimiter","|").schema(firmsSchema).load("firms.txt")
 
-    firms.write.save("firms0")
+    firms.write.mode(SaveMode.Overwrite).save("firms0")
 
 
     def concCols(col1:String, col2:String):String = {
@@ -205,13 +205,13 @@ object FinBins {
   val perms= sqlContext.read.format("com.databricks.spark.csv").option("header","true").option("delimiter","|").schema(permSchema).load("perm.txt")
 
   //val firmPerm = perms.join(firms1,"firmId").sort("firmId")
-    perms.write.save("perms")
+    perms.write.mode(SaveMode.Overwrite).save("perms")
 
 
   val idbr= sqlContext.read.format("com.databricks.spark.csv").option("header","false").option("delimiter",":").option("inferSchema","true").load("IDBR_266.txt")
   println("No of IDBR records:"+idbr.count())
 
-    idbr.write.save("idbr0")
+    idbr.write.mode(SaveMode.Overwrite).save("idbr0")
   //val fss=  sqlContext.read.format("com.databricks.spark.csv").option("header","true").option("delimiter","|").option("inferSchema","true").load("fss.txt")
   //  fss.write.save("fss0")
 
@@ -289,7 +289,7 @@ object FinBins {
 
 */
 
-    firms_idbr1.write.save("firms_idbr1")
+    firms_idbr1.write.mode(SaveMode.Overwrite).save("firms_idbr1")
 
     val evalAddr = udf( (addr1:String, addr2:String) => {1.0})
     val evalName = udf ( (name1:String, name2:String) => {matchName(name1,name2)}  )
