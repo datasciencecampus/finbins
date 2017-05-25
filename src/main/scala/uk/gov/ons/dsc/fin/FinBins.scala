@@ -174,14 +174,24 @@ object FinBins {
 
 
 
-  val fss = sqlContext.read.format("com.databricks.spark.csv").option("header","true").option("MODE","DROPMALFORMED").option("quote","'").schema(fssSchema).load("fss.txt")
+  val fss = sqlContext.read.format("com.databricks.spark.csv")
+                       .option("header","true")
+                       .option("MODE","DROPMALFORMED")
+                       .option("quote","'")
+                       .schema(fssSchema)
+                       .option("delimiter","|")
+                       .load("fss.txt")
 
     fss.write.mode(SaveMode.Overwrite).save("fss0")
 
     println("fss imported and saved. No of Records:" + fss.count())
 
 
-  val firms = sqlContext.read.format("com.databricks.spark.csv").option("header","true").option("delimiter","|").schema(firmsSchema).load("firms.txt")
+  val firms = sqlContext.read.format("com.databricks.spark.csv")
+                       .option("header","true")
+                       .option("delimiter","|")
+                       .schema(firmsSchema)
+                       .load("firms.txt")
 
     firms.write.mode(SaveMode.Overwrite).save("firms0")
 
@@ -200,7 +210,7 @@ object FinBins {
 
   val firms1 = firms.withColumn("PostCode", getConcatenated(firms.col("name12"), firms.col("name13") ))
   println("No of FCA firms records:"+firms1.count())
-    firms1.write.save("firms1")
+    firms1.write.mode(SaveMode.Overwrite).save("firms1")
 
   val perms= sqlContext.read.format("com.databricks.spark.csv").option("header","true").option("delimiter","|").schema(permSchema).load("perm.txt")
 
@@ -208,7 +218,12 @@ object FinBins {
     perms.write.mode(SaveMode.Overwrite).save("perms")
 
 
-  val idbr= sqlContext.read.format("com.databricks.spark.csv").option("header","false").option("delimiter",":").option("inferSchema","true").load("IDBR_266.txt")
+  val idbr= sqlContext.read.format("com.databricks.spark.csv")
+                         .option("header","false")
+                         .option("delimiter",":")
+                         .option("inferSchema","true")
+                         .load("IDBR_266.txt")
+    
   println("No of IDBR records:"+idbr.count())
 
     idbr.write.mode(SaveMode.Overwrite).save("idbr0")
