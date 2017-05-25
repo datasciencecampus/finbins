@@ -4,6 +4,7 @@ package uk.gov.ons.dsc.fin
   * Created by noyva on 03/05/2017.
   */
 
+import org.apache.spark.sql.SaveMode
 import uk.gov.ons.dsc.utils.stringmetric.StringMetric
 import org.apache.spark.sql.functions.udf
 import org.apache.spark.sql.types.{IntegerType, StringType, StructField, StructType}
@@ -173,9 +174,12 @@ object FinBins {
 
 
 
-  val fss = sqlContext.read.format("com.databricks.spark.csv").option("header","true").option("drop","true").option("NODE","DROPMALFORMED").option("quote","'").schema(fssSchema).load("fss.txt")
+  val fss = sqlContext.read.format("com.databricks.spark.csv").option("header","true").option("MODE","DROPMALFORMED").option("quote","'").schema(fssSchema).load("fss.txt")
 
-    fss.write.save("fss0")
+    fss.write.mode(SaveMode.Overwrite).save("fss0")
+
+    println("fss imported and saved. No of Records:" + fss.count())
+
 
   val firms = sqlContext.read.format("com.databricks.spark.csv").option("header","true").option("delimiter","|").schema(firmsSchema).load("firms.txt")
 
