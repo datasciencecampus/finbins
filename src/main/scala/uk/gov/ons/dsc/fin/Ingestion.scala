@@ -35,7 +35,7 @@ object Ingestion {
       StructField("CellSelection",StringType,true),StructField("CurrentSIC",StringType,true),
       StructField("Turnover",StringType,true),StructField("Instance",StringType,true),
       StructField("KeyContributor",StringType,true),
-      StructField("q0001",StringType,true),StructField("q0002",StringType,true),StructField("q003",StringType,true),StructField("q0100",StringType,true),
+      StructField("q0001",StringType,true),StructField("q0002",StringType,true),StructField("q0003",StringType,true),StructField("q0100",StringType,true),
       StructField("q0101",StringType,true),StructField("q0102",StringType,true),StructField("q0103",StringType,true),
       StructField("q0104",StringType,true),StructField("q0105",StringType,true),StructField("q0106",StringType,true),
       StructField("q0107",StringType,true),StructField("q0108",StringType,true),StructField("q0109",StringType,true),
@@ -234,89 +234,6 @@ object Ingestion {
 
   println("No of fss records:"+fss.count())
 
-
-
-
-
-  def matchPC(PC1:String, PC2:String, PC3:String):Boolean = {
-    if (PC1 == null || PC2 == null || PC3 == null) {
-      false
-    }
-   // else if (PC3.replaceAll(" ","").toUpperCase == (PC1 + PC2).replaceAll(" ","").toUpperCase ) {
-     else if ( PC3.contains(PC1.trim) && PC3.contains(PC2.trim) ) {
-      true
-    }
-    else {
-      false
-    }
-  }
-
-
-   def matchAddr(Addr1:String, Addr2:String) :Boolean = {
-
-     if (Addr1.replaceAll(" ","").toUpperCase == Addr2.replaceAll(" ","").toUpperCase) {
-       true
-     } else {
-       false
-     }
-   }
-
-
-   def matchName (Name1:String, Name2:String) :Int = {
-     if (Name1 == null || Name2 == null) {
-       0
-     } else {
-       val dist =  StringMetric.compareWithLevenshtein(Name1.toCharArray, Name2.toCharArray)
-       println (Name1 + " " + Name2 + ":" + dist)
-       dist.get
-     }
-   }
-
-
-
-
-
-    sqlContext.udf.register("matchPC",matchPC _)
-   // sqlContext.udf.register("matchAddr",matchPC _)
-   // sqlContext.udf.register("matchName",matchPC _)
-
-
-    idbr.registerTempTable("IDBR")
-    firms1.registerTempTable("FIRMS")
-
-    //println("Test of matchName:"+ matchName("abv","abcd"))
-
-   // val firms_idbr1 = sqlContext.sql("SELECT IDBR.C37, FIRMS.name12, FIRMS.name13 , FIRMS.name2 , IDBR.C27 , FIRMS.name3 ,  FROM IDBR, FIRMS WHERE matchPC(FIRMS.name12, FIRMS.name13, IDBR.C37 )")
-
-//***    val firms_idbr1 = sqlContext.sql("SELECT * FROM IDBR, FIRMS WHERE matchPC(FIRMS.name12, FIRMS.name13, IDBR.C37 )")
-
-   // val firms_idbr1 = sqlContext.sql("SELECT IDBR.C37, FIRMS.name12, FIRMS.name13 FROM IDBR JOIN FIRMS ON IDBR.C37 = FIRMS.PostCode")
-
- //***   println("No of rec with matching postcode records:"+firms_idbr1.count())
-
-   /* val firms_idbr2 = sqlContext.sql("SELECT IDBR.C37, FIRMS.name12, FIRMS.name13 FROM IDBR, FIRMS WHERE matchPC(FIRMS.name12, FIRMS.name13, IDBR.C37 ) AND matchAddr (FIRMS.name6, IDBR.C32) ")
-
-    println("No of rec with matching postcode and address records:"+firms_idbr2.count())
-
-    val firms_idbr3 = sqlContext.sql("SELECT IDBR.C37, FIRMS.name12, FIRMS.name13 FROM IDBR, FIRMS WHERE matchPC(FIRMS.name12, FIRMS.name13, IDBR.C37 ) AND matchAddr (FIRMS.name12, FIRMS.name13) AND  matchName (FIRMS.name12, FIRMS.name13)")
-
-    println("No of rec with matching postcode, address and name records:"+firms_idbr3.count())
-
-*/
-
- //***   firms_idbr1.write.mode(SaveMode.Overwrite).save("firms_idbr1")
-
-    val evalAddr = udf( (addr1:String, addr2:String) => {1.0})
-    val evalName = udf ( (name1:String, name2:String) => {matchName(name1,name2)}  )
-
-
- //******   val firms_idbr2 = firms_idbr1.withColumn("AddrMatch",evalAddr(firms_idbr1.col("name3"),firms_idbr1.col("name3")))
-
- //****   println("No of rec with matching address records:"+firms_idbr2.count())
-
-//*****    val firms_idbr3 = firms_idbr2.withColumn("NameMatchScore", evalName(firms_idbr1.col("C27"),firms_idbr1.col("name2")))
-
- //****   println("No of rec with matching name records:"+firms_idbr3.count())
 
 
 
