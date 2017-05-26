@@ -28,8 +28,8 @@ object Ingestion {
 
     val fssSchema = StructType(Array(
       StructField("InquiryIDBRCode",StringType,true),StructField("IDBRPeriod",StringType,true),
-      StructField("RUReference",IntegerType,false),StructField("FormStatus",StringType,true),
-      StructField("Update",StringType,true),StructField("Emplyees",IntegerType,true),
+      StructField("RUReference",StringType,false),StructField("FormStatus",StringType,true),
+      StructField("Update",StringType,true),StructField("Emplyees",StringType,true),
       StructField("DataSource",StringType,true),StructField("FormType",StringType,true),
       StructField("ReceiptDate",StringType,true),StructField("Region",StringType,true),
       StructField("CellSelection",StringType,true),StructField("CurrentSIC",StringType,true),
