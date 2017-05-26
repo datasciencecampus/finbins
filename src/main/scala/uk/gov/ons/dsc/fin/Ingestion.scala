@@ -176,7 +176,7 @@ object Ingestion {
 
   val fss = sqlContext.read.format("com.databricks.spark.csv")
                        .option("header","true")
-                       .option("MODE","DROPMALFORMED")
+         //              .option("MODE","DROPMALFORMED")
          //              .option("quote","'")
                        .schema(fssSchema)
                        .option("delimiter","|")
