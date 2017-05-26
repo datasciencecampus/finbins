@@ -12,12 +12,12 @@ import org.apache.spark.{SparkConf, SparkContext}
 
 
 
-object FinBins {
+object Ingestion {
 
 
   def main (args:Array[String]):Unit = {
 
-    val appName = "FinBins"
+    val appName = "FinBins-Ingestion"
     //val master = args(0)
     val master = "yarn-client"
 
@@ -223,7 +223,7 @@ object FinBins {
                          .option("delimiter",":")
                          .option("inferSchema","true")
                          .load("IDBR_266.txt")
-    
+
   println("No of IDBR records:"+idbr.count())
 
     idbr.write.mode(SaveMode.Overwrite).save("idbr0")
@@ -288,11 +288,11 @@ object FinBins {
 
    // val firms_idbr1 = sqlContext.sql("SELECT IDBR.C37, FIRMS.name12, FIRMS.name13 , FIRMS.name2 , IDBR.C27 , FIRMS.name3 ,  FROM IDBR, FIRMS WHERE matchPC(FIRMS.name12, FIRMS.name13, IDBR.C37 )")
 
-    val firms_idbr1 = sqlContext.sql("SELECT * FROM IDBR, FIRMS WHERE matchPC(FIRMS.name12, FIRMS.name13, IDBR.C37 )")
+//***    val firms_idbr1 = sqlContext.sql("SELECT * FROM IDBR, FIRMS WHERE matchPC(FIRMS.name12, FIRMS.name13, IDBR.C37 )")
 
    // val firms_idbr1 = sqlContext.sql("SELECT IDBR.C37, FIRMS.name12, FIRMS.name13 FROM IDBR JOIN FIRMS ON IDBR.C37 = FIRMS.PostCode")
 
-    println("No of rec with matching postcode records:"+firms_idbr1.count())
+ //***   println("No of rec with matching postcode records:"+firms_idbr1.count())
 
    /* val firms_idbr2 = sqlContext.sql("SELECT IDBR.C37, FIRMS.name12, FIRMS.name13 FROM IDBR, FIRMS WHERE matchPC(FIRMS.name12, FIRMS.name13, IDBR.C37 ) AND matchAddr (FIRMS.name6, IDBR.C32) ")
 
@@ -304,19 +304,19 @@ object FinBins {
 
 */
 
-    firms_idbr1.write.mode(SaveMode.Overwrite).save("firms_idbr1")
+ //***   firms_idbr1.write.mode(SaveMode.Overwrite).save("firms_idbr1")
 
     val evalAddr = udf( (addr1:String, addr2:String) => {1.0})
     val evalName = udf ( (name1:String, name2:String) => {matchName(name1,name2)}  )
 
 
-    val firms_idbr2 = firms_idbr1.withColumn("AddrMatch",evalAddr(firms_idbr1.col("name3"),firms_idbr1.col("name3")))
+ //******   val firms_idbr2 = firms_idbr1.withColumn("AddrMatch",evalAddr(firms_idbr1.col("name3"),firms_idbr1.col("name3")))
 
-    println("No of rec with matching address records:"+firms_idbr2.count())
+ //****   println("No of rec with matching address records:"+firms_idbr2.count())
 
-    val firms_idbr3 = firms_idbr2.withColumn("NameMatchScore", evalName(firms_idbr1.col("C27"),firms_idbr1.col("name2")))
+//*****    val firms_idbr3 = firms_idbr2.withColumn("NameMatchScore", evalName(firms_idbr1.col("C27"),firms_idbr1.col("name2")))
 
-    println("No of rec with matching name records:"+firms_idbr3.count())
+ //****   println("No of rec with matching name records:"+firms_idbr3.count())
 
 
 
