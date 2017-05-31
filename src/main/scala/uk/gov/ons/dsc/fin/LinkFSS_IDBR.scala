@@ -22,7 +22,7 @@ object LinkFSS_IDBR {
 
     val fss = sqlContext.read.load("fss0")
 
-    
+    val fss_idbr = fss.join(idbr,"RUReference === ")
   }
 
 }
