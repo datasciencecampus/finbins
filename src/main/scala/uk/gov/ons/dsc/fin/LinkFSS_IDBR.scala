@@ -1,5 +1,6 @@
 package uk.gov.ons.dsc.fin
 
+import org.apache.spark.sql.SaveMode
 import org.apache.spark.{SparkConf, SparkContext}
 
 /**
@@ -9,7 +10,7 @@ object LinkFSS_IDBR {
 
   def main (args:Array[String]):Unit = {
 
-    val appName = "FinBins_Name_Addr_Matching"
+    val appName = "FinBins_FSS_IDBR linking"
     //val master = args(0)
     val master = "yarn-client"
 
@@ -22,7 +23,9 @@ object LinkFSS_IDBR {
 
     val fss = sqlContext.read.load("fss0")
 
-    val fss_idbr = fss.join(idbr,"RUReference === ")
+    val fss_idbr = fss.join(idbr,"RUReference === Id")
+
+    fss_idbr.write.mode(SaveMode.Overwrite).save("fss_idbr")
   }
 
 }
