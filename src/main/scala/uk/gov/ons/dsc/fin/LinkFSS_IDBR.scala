@@ -23,7 +23,7 @@ object LinkFSS_IDBR {
 
     val fss = sqlContext.read.load("fss0")
 
-    val joinExpr = fss.col("RUReference") === idbr.col("Id")
+    val joinExpr = fss.col("RUReference") === idbr.col("CO")
 
     val fss_idbr = fss.join(idbr,joinExpr)
 
