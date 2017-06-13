@@ -34,7 +34,8 @@ object Ingestion {
                        .option("header","true")
          //              .option("MODE","DROPMALFORMED")
          //              .option("quote","'")
-                       .schema(fssSchema)
+         //              .schema(fssSchema)
+                        .option("inferSchema","true")
                        .option("delimiter","|")
                        .load("fss.txt")
 
