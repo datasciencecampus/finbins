@@ -34,8 +34,8 @@ object Ingestion {
                        .option("header","true")
          //              .option("MODE","DROPMALFORMED")
          //              .option("quote","'")
-         //              .schema(fssSchema)
-                        .option("inferSchema","true")
+                        .schema(fssSchema)
+         //               .option("inferSchema","true")
                        .option("delimiter","|")
                        .load("fss.txt")
 
@@ -112,13 +112,13 @@ object Ingestion {
   ))
 
   val fssSchema = StructType(Array(
-    StructField("InquiryIDBRCode",StringType,true),StructField("IDBRPeriod",StringType,true),
-    StructField("RUReference",LongType,false),StructField("FormStatus",StringType,true),
-    StructField("Update",StringType,true),StructField("Emplyees",StringType,true),
-    StructField("DataSource",StringType,true),StructField("FormType",StringType,true),
+    StructField("InquiryIDBRCode",StringType,true),StructField("IDBRPeriod",IntegerType,true),
+    StructField("RUReference",LongType,false),StructField("FormStatus",IntegerType,true),
+    StructField("Update",StringType,true),StructField("Emplyees",IntegerType,true),
+    StructField("DataSource",IntegerType,true),StructField("FormType",IntegerType,true),
     StructField("ReceiptDate",StringType,true),StructField("Region",StringType,true),
-    StructField("CellSelection",StringType,true),StructField("CurrentSIC",StringType,true),
-    StructField("Turnover",StringType,true),StructField("Instance",StringType,true),
+    StructField("CellSelection",IntegerType,true),StructField("CurrentSIC",StringType,true),
+    StructField("Turnover",IntegerType,true),StructField("Instance",IntegerType,true),
     StructField("KeyContributor",StringType,true),
     StructField("q0001",IntegerType,true),StructField("q0002",IntegerType,true),StructField("q0003",IntegerType,true),StructField("q0100",IntegerType,true),
     StructField("q0101",StringType,true),StructField("q0102",StringType,true),StructField("q0103",IntegerType,true),
