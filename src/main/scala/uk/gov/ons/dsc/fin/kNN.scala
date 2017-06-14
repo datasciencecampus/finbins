@@ -25,6 +25,7 @@ object kNN {
 
     //register table
     fss_idbr.registerTempTable("fss_idbr")
+    fss_idbr.registerTempTable("fss1")
 
     // find the maximum values of the columns
     val fss_idbr_max = sqlContext.sql("select max(q1001) as q1001m,max(q1002) as q1002m,max(q1003) as q1003m,max(q1004) as q1004m,max(q1005) as q1005m,max(q1006) as q1006m,max(q1007) as q1007m,max(q1008) as q1008m,max(q1009) as q1009m,max(q1010) as q1010m," +
@@ -54,6 +55,11 @@ object kNN {
     //val fss_idbr_dist = fss_idbr.withColumn("D1",null)
 
 
+    // calculate combinations
+
+    val distances = sqlContext.sql("select * from fss_idbr,fss1 where fss1.RUReference > fss_idbr.RUReference  ")
+
+    println("distances No:"+distances.count)
 
     // assign rows to clusters
   }
