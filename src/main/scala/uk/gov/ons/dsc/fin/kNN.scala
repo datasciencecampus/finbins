@@ -59,6 +59,8 @@ object kNN {
 
     val distances = sqlContext.sql("select * from fss_idbr,fss1 where fss1.RUReference > fss_idbr.RUReference  ")
 
+    distances.write.mode(SaveMode.Overwrite).save("distances")
+
     println("distances No:"+distances.count)
 
     // assign rows to clusters
