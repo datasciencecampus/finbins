@@ -57,7 +57,7 @@ object kNN {
 
     // calculate combinations
 
-    val distances = sqlContext.sql("select fss1.RUReference AS Ref1, fss_idbr.RUReference AS Ref2, SQRT (SQUARE(fss1.q1001 - fss_idbr.q1001) + SQUARE(fss1.q1002 - fss_idbr.q1002)) as dist from fss_idbr,fss1 where fss1.RUReference > fss_idbr.RUReference  ")
+    val distances = sqlContext.sql("select fss1.RUReference AS Ref1, fss_idbr.RUReference AS Ref2, SQRT (POWER((fss1.q1001 - fss_idbr.q1001),2) + POWER((fss1.q1002 - fss_idbr.q1002),2)) as dist from fss_idbr,fss1 where fss1.RUReference > fss_idbr.RUReference  ")
 
     distances.write.mode(SaveMode.Overwrite).save("distances")
 
