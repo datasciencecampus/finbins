@@ -38,10 +38,7 @@ object SIC_RF {
     val appName = "FinBins_PredictSIC_RF"
     //val master = args(0)
     val master = "yarn-client"
-    var ngram_size = 4
-    if (args.length > 0) {
-      ngram_size = args(1).toInt
-    }
+    
 
 
     //init
