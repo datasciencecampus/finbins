@@ -61,7 +61,7 @@ object kNN {
 
     distances.write.mode(SaveMode.Overwrite).save("distances")
 
-    println("distances No:"+distances.count)
+    println("No of distance records saved:"+distances.count)
 
     // assign rows to clusters
   }

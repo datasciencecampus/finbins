@@ -10,7 +10,7 @@ import uk.gov.ons.dsc.fin.SICNaiveBayes.{cvModelName, indexer_label, modelNB, tr
 /**
   * Created by noyva on 25/05/2017.
   */
-class SIC_RF {
+object SIC_RF {
 
   // features
   val cvModelName  = new CountVectorizer()
@@ -51,20 +51,20 @@ class SIC_RF {
 
 
     //Load and Prep data
-    val fss = sqlContext.read.load("fss0")
+    val fssIDBR = sqlContext.read.load("fss_idbr")
       .withColumnRenamed("C5","SIC")
       .withColumnRenamed("C26","CompanyName")
       .withColumnRenamed("C32","AddressLine1")
       .dropDuplicates(Array("CompanyName"))
 
-    fss.registerTempTable("fss")
+    fssIDBR.registerTempTable("fss_idbr")
 
 
-    val Array(trainingData, testData) = fss.randomSplit(Array(0.90, 0.10))
+    val Array(trainingData, testData) = fssIDBR.randomSplit(Array(0.90, 0.10))
     trainingData.cache.count
     testData.cache.count
 
-    val fssPred =traingEval(Array(cvModelName, indexer_label, modelNB.setFeaturesCol(cvModelName.getOutputCol)), trainingData, testData, sqlContext)
+    val fssPred =traingEval(Array(cvModelName, indexer_label, modelRF.setFeaturesCol(cvModelName.getOutputCol)), trainingData, testData, sqlContext)
     fssPred.write.mode(SaveMode.Overwrite).save("predictions")
 
 
