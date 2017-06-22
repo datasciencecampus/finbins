@@ -1,11 +1,12 @@
 package uk.gov.ons.dsc.fin
 
 import org.apache.spark.ml.classification.RandomForestClassifier
-import org.apache.spark.ml.feature.{CountVectorizer, StringIndexer}
+import org.apache.spark.ml.feature.{Binarizer, CountVectorizer, StringIndexer}
 import org.apache.spark.ml.{Pipeline, PipelineStage}
 import org.apache.spark.{SparkConf, SparkContext}
-import org.apache.spark.sql.{DataFrame, SQLContext, SaveMode}
-import uk.gov.ons.dsc.fin.SICNaiveBayes.{cvModelName, indexer_label, modelNB, traingEval}
+import org.apache.spark.sql.{DataFrame, SQLContext, SaveMode }
+import org.apache.spark.sql.Column
+//import uk.gov.ons.dsc.fin.SICNaiveBayes.{cvModelName, indexer_label, modelNB, traingEval}
 
 /**
   * Created by noyva on 25/05/2017.
@@ -13,10 +14,10 @@ import uk.gov.ons.dsc.fin.SICNaiveBayes.{cvModelName, indexer_label, modelNB, tr
 object SIC_RF {
 
   // features
-  val cvModelName  = new CountVectorizer()
+  val cvModelName  = new Binarizer()
     .setInputCol("q1043")
-    .setOutputCol("features")
-    .setMinDF(2)
+    .setOutputCol("feature")
+    .setThreshold(0.5)
 
   // labels
   val indexer_label = new StringIndexer()
@@ -31,6 +32,7 @@ object SIC_RF {
                               .setImpurity("gini")
                               .setMaxDepth(4)
                               .setMaxBins(32)
+                           //   .setFeaturesCol("features")
 
 
   def  main (args:Array[String]):Unit = {
@@ -52,6 +54,7 @@ object SIC_RF {
       .withColumnRenamed("C5","SIC")
       .withColumnRenamed("C26","CompanyName")
       .withColumnRenamed("C32","AddressLine1")
+      .withColumnRenamed("q1043","features")
       .dropDuplicates(Array("CompanyName"))
 
     fssIDBR.registerTempTable("fss_idbr")
@@ -61,7 +64,7 @@ object SIC_RF {
     trainingData.cache.count
     testData.cache.count
 
-    val fssPred =traingEval(Array(cvModelName, indexer_label, modelRF.setFeaturesCol(cvModelName.getOutputCol)), trainingData, testData, sqlContext)
+    val fssPred =traingEval(Array( indexer_label, modelRF.setFeaturesCol("features")), trainingData, testData, sqlContext)
     fssPred.write.mode(SaveMode.Overwrite).save("predictions")
 
 
