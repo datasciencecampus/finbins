@@ -14,8 +14,8 @@ object SIC_RF {
 
   // features
   val cvModelName  = new CountVectorizer()
-    .setInputCol("ngram_name")
-    .setOutputCol("name_features")
+    .setInputCol("q1043")
+    .setOutputCol("features")
     .setMinDF(2)
 
   // labels
@@ -26,7 +26,7 @@ object SIC_RF {
 
   //model
   val modelRF = new RandomForestClassifier()
-                              .setNumTrees(5)
+                              .setNumTrees(7)
                               .setFeatureSubsetStrategy("auto")
                               .setImpurity("gini")
                               .setMaxDepth(4)
@@ -38,7 +38,7 @@ object SIC_RF {
     val appName = "FinBins_PredictSIC_RF"
     //val master = args(0)
     val master = "yarn-client"
-    
+
 
 
     //init
@@ -76,7 +76,9 @@ object SIC_RF {
 
       val predictions = model.transform(testData)
 
-      predictions.write.mode(SaveMode.Overwrite).save("predictions_raw")
+      predictions.write.mode(SaveMode.Overwrite).save("predictions_RF_raw")
+
+      println("predictions_RF_raw saved ...")
 
       predictions.registerTempTable("predictions")
 
