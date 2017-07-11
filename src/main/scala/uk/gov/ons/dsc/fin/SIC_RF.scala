@@ -61,6 +61,7 @@ object SIC_RF {
       // .withColumn("features")
       //   .withColumn("features",toVec4(fssIDBR(""),fssIDBR("")))
       .dropDuplicates(Array("CompanyName"))
+    .na.fill(0.0)
 
     fssIDBR.registerTempTable("fss_idbr")
 
