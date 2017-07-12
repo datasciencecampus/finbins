@@ -9,6 +9,9 @@ import org.apache.spark.sql.{DataFrame, SQLContext, SaveMode}
 import org.apache.spark.sql.functions.{avg, col, udf}
 import org.apache.spark.mllib.linalg.Vectors
 import org.apache.spark.sql.Column
+import org.apache.spark.sql.Row
+import org.apache.spark.sql.types.{IntegerType, StringType, StructField, StructType, LongType, DoubleType}
+
 //import uk.gov.ons.dsc.fin.SICNaiveBayes.{cvModelName, indexer_label, modelNB, traingEval}
 
 /**
@@ -18,7 +21,6 @@ object SIC_RF {
 
   // features
   val assembler = new VectorAssembler()
-    .setInputCols(Array("q1043", "q1044"))
     .setOutputCol("features")
 
   // labels
@@ -36,6 +38,15 @@ object SIC_RF {
                               .setMaxBins(32)
                            //   .setFeaturesCol("features")
 
+  //result schema
+  val resSchema = StructType(
+    Array(
+      StructField("value", StringType),
+      StructField("value", StringType),
+      StructField("value", StringType),
+      StructField("count", DoubleType)
+    )
+  )
 
 
   def  main(args:Array[String]):Unit = {
@@ -73,6 +84,8 @@ object SIC_RF {
     trainingData.cache.count
     testData.cache.count
 
+    var output = scala.collection.mutable.ListBuffer.empty[Row]
+
     var fCols:Array[String] = null
 
     while (featuresCombIter.hasNext) {
@@ -82,11 +95,22 @@ object SIC_RF {
       assembler.setInputCols(fCols)
 
       val fssPred = traingEval(Array(assembler, indexer_label, modelRF.setFeaturesCol("features")), trainingData, testData, sqlContext)
-      println(" Overall accuracy"+fCols.toString)
-      fssPred.select(avg( (col("numCorrect") / col("total")))).show
 
-      //   fssPred.write.mode(SaveMode.Overwrite).save("SIC_predictions")
+      val accuracy:Double = fssPred.select(avg( (col("numCorrect") / col("total")))).map {row=>row.getDouble(0)}.first()
+      println(" Overall accuracy for features:"+fCols(0)+","+fCols(1)+","+fCols(2)+" is:"+accuracy)
+
+      output = output :+ Row(fCols(0),fCols(1),fCols(2),accuracy)
+
+
     }
+
+    val parallelizedRows = sc.parallelize(output.toSeq)
+
+    val resultDF = sqlContext.createDataFrame(parallelizedRows,resSchema)
+
+    resultDF.write.mode(SaveMode.Overwrite).save("SIC_predictions_feature_selection")
+
+    resultDF.show (100)
 
   }
 
