@@ -51,6 +51,7 @@ object SIC_RF {
 
     val appName = "FinBins_PredictSIC_RF"
     val numFeatures = args(0).toInt
+    val numModels = args(1).toInt
     val master = "yarn-client"
 
 
@@ -88,7 +89,7 @@ object SIC_RF {
 
     var fCols:Array[String] = null
 
-    while (featuresCombIter.hasNext && counter < 3) { // to be removed for testing only
+    while (featuresCombIter.hasNext && counter <= numModels) { 
 
       fCols = featuresCombIter.next()
 
@@ -110,7 +111,7 @@ object SIC_RF {
 
     resultDF.write.mode(SaveMode.Overwrite).save("SIC_predictions_feature_sel_"+numFeatures.toString)
 
-    println("Number of feature combinations saved"+resultDF.count())
+    println("Number of feature combinations saved:"+resultDF.count())
     resultDF.show (100)
 
 
