@@ -10,7 +10,7 @@ import org.apache.spark.sql.functions.{avg, col, udf}
 import org.apache.spark.mllib.linalg.Vectors
 import org.apache.spark.sql.Column
 import org.apache.spark.sql.Row
-import org.apache.spark.sql.types.{IntegerType, StringType, StructField, StructType, LongType, DoubleType}
+import org.apache.spark.sql.types.{IntegerType, StringType, StructField, StructType, LongType, DoubleType, ArrayType}
 
 //import uk.gov.ons.dsc.fin.SICNaiveBayes.{cvModelName, indexer_label, modelNB, traingEval}
 
@@ -41,10 +41,8 @@ object SIC_RF {
   //result schema
   val resSchema = StructType(
     Array(
-      StructField("value", StringType),
-      StructField("value", StringType),
-      StructField("value", StringType),
-      StructField("count", DoubleType)
+      StructField("features", StringType),
+      StructField("accuracy", DoubleType)
     )
   )
 
@@ -52,7 +50,7 @@ object SIC_RF {
   def  main(args:Array[String]):Unit = {
 
     val appName = "FinBins_PredictSIC_RF"
-    //val master = args(0)
+    val numFeatures = args(0).toInt
     val master = "yarn-client"
 
 
@@ -75,7 +73,9 @@ object SIC_RF {
 
     val featureCols = fssIDBR.dtypes.filter(f=>  f._2=="DoubleType").map(f=>f._1)
 
-    val featuresCombIter = featureCols.combinations(3)
+    val featuresCombIter = featureCols.combinations(numFeatures)
+
+    var counter:Long = 0
 
     fssIDBR.registerTempTable("fss_idbr")
 
@@ -88,7 +88,7 @@ object SIC_RF {
 
     var fCols:Array[String] = null
 
-    while (featuresCombIter.hasNext) {
+    while (featuresCombIter.hasNext && counter < 3) { // to be removed for testing only
 
       fCols = featuresCombIter.next()
 
@@ -97,9 +97,9 @@ object SIC_RF {
       val fssPred = traingEval(Array(assembler, indexer_label, modelRF.setFeaturesCol("features")), trainingData, testData, sqlContext)
 
       val accuracy:Double = fssPred.select(avg( (col("numCorrect") / col("total")))).map {row=>row.getDouble(0)}.first()
-      println(" Overall accuracy for features:"+fCols(0)+","+fCols(1)+","+fCols(2)+" is:"+accuracy)
-
-      output = output :+ Row(fCols(0),fCols(1),fCols(2),accuracy)
+      println("No:" + counter.toString + " accuracy for features:"+fCols.mkString(",")+" is:"+accuracy)
+      counter += 1
+      output = output :+ Row(fCols.mkString(","),accuracy)
 
 
     }
@@ -108,9 +108,11 @@ object SIC_RF {
 
     val resultDF = sqlContext.createDataFrame(parallelizedRows,resSchema)
 
-    resultDF.write.mode(SaveMode.Overwrite).save("SIC_predictions_feature_selection")
+    resultDF.write.mode(SaveMode.Overwrite).save("SIC_predictions_feature_sel_"+numFeatures.toString)
 
+    println("Number of feature combinations saved"+resultDF.count())
     resultDF.show (100)
+
 
   }
 
@@ -132,6 +134,8 @@ object SIC_RF {
       sqlContext.sql("select SIC, label, count(case when label = prediction then 1 end) as numCorrect, count(*) as total from predictions group by  SIC, label, prediction order by SIC, prediction asc ").repartition((1))
 
     }
+
+
 
 
 }
