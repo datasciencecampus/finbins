@@ -16,7 +16,7 @@ object SIC_RF_SINGL {
 
   // features
   val assembler = new VectorAssembler()
-    .setInputCols(Array("q1043", "q1044"))
+   // .setInputCols(Array("q1043", "q1044"))
     .setOutputCol("features")
 
   // labels
@@ -39,6 +39,22 @@ object SIC_RF_SINGL {
   def  main(args:Array[String]):Unit = {
 
     val appName = "FinBins_PredictSIC_RF"
+    val numFeatures = args.length
+
+    /*
+    val fCols:Array[String] = numFeatures match {
+      case 1 => Array(args(0))
+      case 2 => Array(args(0), args(1))
+      case 3 => Array(args(0), args(1), args(2))
+      case 4 => Array(args(0), args(1), args(2), args(3))
+      case 5 => Array(args(0), args(1), args(2), args(3), args(4))
+      case 5 => Array(args(0), args(1), args(2), args(3), args(4), args(5) )
+
+    }
+    */
+
+    val fCols = args
+
     //val master = args(0)
     val master = "yarn-client"
 
@@ -67,11 +83,20 @@ object SIC_RF_SINGL {
     trainingData.cache.count
     testData.cache.count
 
+    // configure the feature columns in the assembler
+    assembler.setInputCols(fCols)
+    println("setting the features to:"+fCols.mkString(","))
+
 
 
     val fssPred =traingEval(Array( assembler,indexer_label, modelRF.setFeaturesCol("features")), trainingData, testData, sqlContext)
-    fssPred.write.mode(SaveMode.Overwrite).save("SIC_predictions")
+    fssPred.write.mode(SaveMode.Overwrite).save("SIC_predictionsFrom"+fCols.mkString("_"))
 
+    fssPred.write.mode("overwrite").json("RF_SIC_results/resRF_"+fCols.mkString("_")+".json")
+
+
+    println ("Results for features:"+ fCols.mkString(",") )
+    fssPred.show(50)
 
   }
 

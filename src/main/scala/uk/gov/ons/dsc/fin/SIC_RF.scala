@@ -49,15 +49,21 @@ object SIC_RF {
 
   def  main(args:Array[String]):Unit = {
 
-    val appName = "FinBins_PredictSIC_RF"
-    val numFeatures = args(0).toInt
-    val numModels = args(1).toInt
+    val appName = "FinBins_PredictSIC_RF_restricted"
+
+    val numFeatures = args(0).toInt // number of features in the RF classifier
+    val startPos    = args(1).toInt    // starting combination
+    val endComb     = args(2).toInt   // end combination
+
     val master = "yarn-client"
 
 
 
     //init
-    val conf = new SparkConf().setAppName(appName).setMaster(master)
+    val conf = new SparkConf()
+                   .setAppName(appName)
+                   .setMaster(master)
+
     val sc: SparkContext = new SparkContext(conf)
     val sqlContext = new SQLContext(sc)
 
@@ -89,18 +95,24 @@ object SIC_RF {
 
     var fCols:Array[String] = null
 
-    while (featuresCombIter.hasNext && counter <= numModels) { 
+    while (featuresCombIter.hasNext && counter <= endComb) {
 
       fCols = featuresCombIter.next()
 
-      assembler.setInputCols(fCols)
+      if (counter >= startPos) {
+        assembler.setInputCols(fCols)
 
-      val fssPred = traingEval(Array(assembler, indexer_label, modelRF.setFeaturesCol("features")), trainingData, testData, sqlContext)
+        val fssPred = traingEval(Array(assembler, indexer_label, modelRF.setFeaturesCol("features")), trainingData, testData, sqlContext)
 
-      val accuracy:Double = fssPred.select(avg( (col("numCorrect") / col("total")))).map {row=>row.getDouble(0)}.first()
-      println("No:" + counter.toString + " accuracy for features:"+fCols.mkString(",")+" is:"+accuracy)
+        val accuracy: Double = fssPred.select(avg((col("numCorrect") / col("total")))).map { row => row.getDouble(0) }.first()
+
+        fssPred.write.mode("overwrite").json("RF_SIC_results/resRF_"+fCols.mkString("_")+".json")
+
+        println("No:" + counter.toString + " accuracy for features:" + fCols.mkString(",") + " is:" + accuracy)
+
+        output = output :+ Row(fCols.mkString(","), accuracy)
+      }
       counter += 1
-      output = output :+ Row(fCols.mkString(","),accuracy)
 
 
     }
