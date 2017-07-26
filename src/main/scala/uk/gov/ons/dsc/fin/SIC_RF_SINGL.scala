@@ -6,7 +6,7 @@ import org.apache.spark.ml.{Pipeline, PipelineStage}
 import org.apache.spark.ml.feature.VectorAssembler
 import org.apache.spark.{SparkConf, SparkContext}
 import org.apache.spark.sql.{DataFrame, SQLContext, SaveMode}
-import org.apache.spark.sql.functions.udf
+import org.apache.spark.sql.functions.{avg, col, udf}
 import org.apache.spark.mllib.linalg.Vectors
 
 /**
@@ -38,7 +38,7 @@ object SIC_RF_SINGL {
 
   def  main(args:Array[String]):Unit = {
 
-    val appName = "FinBins_PredictSIC_RF"
+    val appName = "FinBins_PredictSIC_RF_singleModel"
     val numFeatures = args.length
 
     /*
@@ -97,6 +97,12 @@ object SIC_RF_SINGL {
 
     println ("Results for features:"+ fCols.mkString(",") )
     fssPred.show(50)
+
+    println ("Results for features:"+ fCols.mkString(",") )
+
+    val accuracy: Double = fssPred.select(avg((col("numCorrect") / col("total")))).map { row => row.getDouble(0) }.first()
+
+    println( " Accuracy for features:" + fCols.mkString(",") + " is:" + accuracy)
 
   }
 

@@ -135,9 +135,9 @@ object LinkFCA_IDBR {
             dis1.min
           }
 
-          dis2.sum + Math.abs(in1.length - in2.length)*3
+          // dis2.sum + Math.abs(in1.length - in2.length)*3
 
-
+         dis2.sum
       }
     }
 

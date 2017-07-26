@@ -2,6 +2,10 @@ package uk.gov.ons.dsc.fin
 
 import org.apache.spark.sql.SaveMode
 import org.apache.spark.{SparkConf, SparkContext}
+import org.apache.spark.mllib.linalg.Vectors
+import org.apache.spark.ml.feature.VectorAssembler
+import org.apache.spark.ml.feature.MinMaxScaler
+import org.apache.spark.sql.functions.udf
 
 /**
   * Created by noyva on 09/06/2017.
@@ -23,12 +27,33 @@ object kNN {
 
     val fss_idbr = sqlContext.read.load("fss_idbr")
 
+    val assembler = new VectorAssembler()
+      .setInputCols(Array("q1001", "q1002", "q1003","q1004" )) // NB assemble them automatically
+      .setOutputCol("features")
+
+    val fss_idbr2 = assembler.transform(fss_idbr)
+
+    fss_idbr2.show()
+
+
+   /* val knn = new KNNClassifier()
+      .setTopTreeSize(training.count().toInt / 500)
+      .setK(10)
+
+    val knnModel = knn.fit(training)
+
+    val predicted = knnModel.transform(training)
+
+*/
+    //val vectorizeCol = udf( (v:Double) => Vectors.dense(Array(v)) )
+    //val fss_idbr2 = fss_idbr.withColumn("vVec", vectorizeCol(fss_idbr("v")))
+
     //register table
-    fss_idbr.registerTempTable("fss_idbr")
-    fss_idbr.registerTempTable("fss1")
+    //  fss_idbr2.registerTempTable("fss_idbr")
+    //fss_idbr.registerTempTable("fss1")
 
     // find the maximum values of the columns
-    val fss_idbr_max = sqlContext.sql("select max(q1001) as q1001m,max(q1002) as q1002m,max(q1003) as q1003m,max(q1004) as q1004m,max(q1005) as q1005m,max(q1006) as q1006m,max(q1007) as q1007m,max(q1008) as q1008m,max(q1009) as q1009m,max(q1010) as q1010m," +
+    /*val fss_idbr_max = sqlContext.sql("select max(q1001) as q1001m,max(q1002) as q1002m,max(q1003) as q1003m,max(q1004) as q1004m,max(q1005) as q1005m,max(q1006) as q1006m,max(q1007) as q1007m,max(q1008) as q1008m,max(q1009) as q1009m,max(q1010) as q1010m," +
       "max(q1011) as q1011m,max(q1012) as q1012m,max(q1013) as q1013m,max(q1014) as q1014m,max(q1015) as q1015m,max(q1016) as q1016m,max(q1017) as q1017m,max(q1018) as q1018m,max(q1019) as q1019m,max(q1020) as q1020m," +
       "max(q1023) as q1023m,max(q1024) as q1024m,max(q1025) as q1025m,max(q1026) as q1026m,max(q1027) as q1027m,max(q1028) as q1028m,max(q1029) as q1029m,max(q1030) as q1030m,max(q1031) as q1031m,max(q1032) as q1032m,max(q1033) as q1033m,max(q1034) as q1034m," +
       "max(q1035) as q1035m,max(q1036) as q1036m,max(q1037) as q1037m,max(q1038) as q1038m,max(q1039) as q1039m,max(q1040) as q1040m,max(q1041) as q1041m,max(q1042) as q1042m,max(q1043) as q1043m,max(q1044) as q1044m,max(q1045) as q1045m," +
@@ -42,7 +67,8 @@ object kNN {
       "max(q2017) as q2017m,max(q2018) as q2018m,max(q2019) as q2019m,max(q2020) as q2020m,max(q2021) as q2021m,max(q2022) as q2022m,max(q2023) as q2023m,max(q2024) as q2024m,max(q2025) as q2025m     from fss_idbr")
 
     //display the results
-    fss_idbr_max.show(1,false)
+    //fss_idbr_max.show(1,false)
+
 
     //save the max values
     fss_idbr_max.write.mode(SaveMode.Overwrite).save("fss_idbr_max")
@@ -64,6 +90,8 @@ object kNN {
     println("No of distance records saved:"+distances.count)
 
     // assign rows to clusters
+
+    */
   }
 
 }
