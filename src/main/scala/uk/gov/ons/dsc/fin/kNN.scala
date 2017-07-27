@@ -1,11 +1,10 @@
 package uk.gov.ons.dsc.fin
 
-import org.apache.spark.sql.SaveMode
+import org.apache.spark.ml.Pipeline
+import org.apache.spark.ml.classification.KNNClassifier
+import org.apache.spark.ml.feature.{PCA, VectorAssembler}
+import org.apache.spark.sql.DataFrame
 import org.apache.spark.{SparkConf, SparkContext}
-import org.apache.spark.mllib.linalg.Vectors
-import org.apache.spark.ml.feature.VectorAssembler
-import org.apache.spark.ml.feature.MinMaxScaler
-import org.apache.spark.sql.functions.udf
 
 /**
   * Created by noyva on 09/06/2017.
@@ -35,16 +34,60 @@ object kNN {
 
     fss_idbr2.show()
 
+    //split training and testing
+    val Array(train, test) = fss_idbr2
+      .randomSplit(Array(0.7, 0.3), seed = 1234L)
+      .map(_.cache())
 
-   /* val knn = new KNNClassifier()
-      .setTopTreeSize(training.count().toInt / 500)
+/*
+    val knn = new KNNClassifier()
+      .setTopTreeSize(train.count().toInt / 500)
       .setK(10)
 
-    val knnModel = knn.fit(training)
+    val knnModel = knn.fit(train)
 
     val predicted = knnModel.transform(training)
 
 */
+
+    // convert "features" from mllib.linalg.Vector to ml.linalg.Vector
+    //val dataset = MLUtils.convertVectorColumnsToML(rawDataset)
+
+
+
+    //create PCA matrix to reduce feature dimensions
+    val pca = new PCA()
+      .setInputCol("features")
+      .setK(50)
+      .setOutputCol("pcaFeatures")
+
+    val knn = new KNNClassifier()
+      .setTopTreeSize(fss_idbr2.count().toInt / 500)
+      .setFeaturesCol("pcaFeatures")
+      .setPredictionCol("predicted")
+      .setK(1)
+
+    val pipeline = new Pipeline()
+      .setStages(Array(pca, knn))
+      .fit(train)
+
+    val insample = validate(pipeline.transform(train))
+    val outofsample = validate(pipeline.transform(test))
+
+    //reference accuracy: in-sample 95% out-of-sample 94%
+    println(s"In-sample: $insample, Out-of-sample: $outofsample")
+  }
+
+  private[this] def validate(results: DataFrame): Double = {
+    results
+      .selectExpr("SUM(CASE WHEN label = predicted THEN 1.0 ELSE 0.0 END) / COUNT(1)")
+      .collect()
+      .head
+      .getDecimal(0)
+      .doubleValue()
+  }
+
+
     //val vectorizeCol = udf( (v:Double) => Vectors.dense(Array(v)) )
     //val fss_idbr2 = fss_idbr.withColumn("vVec", vectorizeCol(fss_idbr("v")))
 
@@ -92,6 +135,6 @@ object kNN {
     // assign rows to clusters
 
     */
-  }
+
 
 }
