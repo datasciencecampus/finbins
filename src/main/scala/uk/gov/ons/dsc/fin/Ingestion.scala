@@ -38,7 +38,7 @@ object Ingestion {
                         .schema(fssSchema)
          //               .option("inferSchema","true")
                        .option("delimiter","|")
-                       .load("fss.txt")
+                       .load("fss.csv")
 
     fss.write.mode(SaveMode.Overwrite).save("fss0")
 
@@ -50,7 +50,7 @@ object Ingestion {
                        .option("header","true")
                        .option("delimiter","|")
                        .schema(firmsSchema)
-                       .load("firms.txt")
+                       .load("firms.csv")
 
     firms.write.mode(SaveMode.Overwrite).save("firms0")
 
@@ -76,7 +76,7 @@ object Ingestion {
                   .option("header","true")
                   .option("delimiter","|")
                   .schema(permSchema)
-                  .load("perm.txt")
+                  .load("perm.csv")
 
   //val firmPerm = perms.join(firms1,"firmId").sort("firmId")
     perms.write.mode(SaveMode.Overwrite).save("perms")
@@ -88,7 +88,7 @@ object Ingestion {
                  .option("delimiter",":")
                 //         .option("inferSchema","true")
                  .schema(idbrSchema)
-                 .load("IDBR_266.txt")
+                 .load("IDBR_266.csv")
 
   println("No of IDBR records:"+idbr.count())
 
