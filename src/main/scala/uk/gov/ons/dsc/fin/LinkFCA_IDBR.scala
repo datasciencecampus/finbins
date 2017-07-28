@@ -1,9 +1,8 @@
 package uk.gov.ons.dsc.fin
 
-import org.apache.spark.{SparkConf, SparkContext}
-import uk.gov.ons.dsc.utils.stringmetric.StringMetric
 import org.apache.spark.sql.functions.udf
-import org.apache.spark.sql.SaveMode
+import org.apache.spark.sql.{SaveMode, SparkSession}
+import uk.gov.ons.dsc.utils.stringmetric.StringMetric
 
 
 /**
@@ -18,9 +17,12 @@ object LinkFCA_IDBR {
     val master = "yarn-client"
 
 
-    val conf = new SparkConf().setAppName(appName).setMaster(master)
-    val sc: SparkContext = new SparkContext(conf)
-    val sqlContext = new org.apache.spark.sql.SQLContext(sc)
+    val spark = SparkSession
+      .builder()
+      .master("yarn-client")
+      .appName("FinBins-LinkFCA_IDBR")
+      .config("spark.some.config.option", "some-value")
+      .getOrCreate()
 
 
 
@@ -63,21 +65,21 @@ object LinkFCA_IDBR {
 
 
 
-    sqlContext.udf.register("matchPC",matchPC _)
+    spark.udf.register("matchPC",matchPC _)
     // sqlContext.udf.register("matchAddr",matchPC _)
     // sqlContext.udf.register("matchName",matchPC _)
 
-    val idbr = sqlContext.read.load("idbr0")
-    val firms1 = sqlContext.read.load("firms1")
+    val idbr = spark.read.load("idbr0")
+    val firms1 = spark.read.load("firms1")
 
-    idbr.registerTempTable("IDBR")
-    firms1.registerTempTable("FIRMS")
+    idbr.createGlobalTempView("IDBR")
+    firms1.createGlobalTempView("FIRMS")
 
     //println("Test of matchName:"+ matchName("abv","abcd"))
 
     // val firms_idbr1 = sqlContext.sql("SELECT IDBR.C37, FIRMS.name12, FIRMS.name13 , FIRMS.name2 , IDBR.C27 , FIRMS.name3 ,  FROM IDBR, FIRMS WHERE matchPC(FIRMS.name12, FIRMS.name13, IDBR.C37 )")
 
-    val firms_idbr1 = sqlContext.sql("SELECT * FROM IDBR, FIRMS WHERE matchPC(FIRMS.name12, FIRMS.name13, IDBR.C37 )")
+    val firms_idbr1 = spark.sql("SELECT * FROM IDBR, FIRMS WHERE matchPC(FIRMS.name12, FIRMS.name13, IDBR.C37 )")
 
     println(" Matching postcodes finished ...")
 

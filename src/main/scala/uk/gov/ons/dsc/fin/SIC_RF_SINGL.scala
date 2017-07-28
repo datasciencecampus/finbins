@@ -1,13 +1,10 @@
 package uk.gov.ons.dsc.fin
 
 import org.apache.spark.ml.classification.RandomForestClassifier
-import org.apache.spark.ml.feature.{Binarizer, CountVectorizer, StringIndexer}
+import org.apache.spark.ml.feature.{StringIndexer, VectorAssembler}
 import org.apache.spark.ml.{Pipeline, PipelineStage}
-import org.apache.spark.ml.feature.VectorAssembler
-import org.apache.spark.{SparkConf, SparkContext}
-import org.apache.spark.sql.{DataFrame, SQLContext, SaveMode}
-import org.apache.spark.sql.functions.{avg, col, udf}
-import org.apache.spark.mllib.linalg.Vectors
+import org.apache.spark.sql.functions.{avg, col}
+import org.apache.spark.sql.{DataFrame, SQLContext, SaveMode, SparkSession}
 
 /**
   * Created by noyva on 11/07/2017.
@@ -60,14 +57,19 @@ object SIC_RF_SINGL {
 
 
 
-    //init
-    val conf = new SparkConf().setAppName(appName).setMaster(master)
-    val sc: SparkContext = new SparkContext(conf)
-    val sqlContext = new SQLContext(sc)
+    //init Session
+    val spark = SparkSession
+      .builder()
+      .master("yarn-client")
+      .appName("FinBins-SIC_RF_SINGLE")
+      .config("spark.some.config.option", "some-value")
+      .getOrCreate()
+
+    import spark.implicits._
 
 
     //Load and Prep data
-    val fssIDBR = sqlContext.read.load("fss_idbr")
+    val fssIDBR = spark.read.load("fss_idbr")
       .withColumnRenamed("C5","SIC")
       .withColumnRenamed("C26","CompanyName")
       .withColumnRenamed("C32","AddressLine1")
@@ -76,9 +78,7 @@ object SIC_RF_SINGL {
       .dropDuplicates(Array("CompanyName"))
       .na.fill(0)
 
-    fssIDBR.registerTempTable("fss_idbr")
-
-
+    fssIDBR.createOrReplaceTempView("fss_idbr")
     val Array(trainingData, testData) = fssIDBR.randomSplit(Array(0.90, 0.10))
     trainingData.cache.count
     testData.cache.count
@@ -89,7 +89,7 @@ object SIC_RF_SINGL {
 
 
 
-    val fssPred =traingEval(Array( assembler,indexer_label, modelRF.setFeaturesCol("features")), trainingData, testData, sqlContext)
+    val fssPred =traingEval(Array( assembler,indexer_label, modelRF.setFeaturesCol("features")), trainingData, testData, spark.sqlContext)
     fssPred.write.mode(SaveMode.Overwrite).save("SIC_predictionsFrom"+fCols.mkString("_"))
 
     fssPred.write.mode("overwrite").json("RF_SIC_results/resRF_"+fCols.mkString("_")+".json")
@@ -119,7 +119,7 @@ object SIC_RF_SINGL {
 
     println("predictions_RF_raw saved ...")
 
-    predictions.registerTempTable("predictions")
+    predictions.createOrReplaceTempView("predictions")
 
     sqlContext.sql("select SIC, label, count(case when label = prediction then 1 end) as numCorrect, count(*) as total from predictions group by  SIC, label, prediction order by SIC, prediction asc ").repartition((1))
 

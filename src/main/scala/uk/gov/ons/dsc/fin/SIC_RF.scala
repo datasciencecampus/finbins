@@ -1,16 +1,11 @@
 package uk.gov.ons.dsc.fin
 
 import org.apache.spark.ml.classification.RandomForestClassifier
-import org.apache.spark.ml.feature.{Binarizer, CountVectorizer, StringIndexer}
+import org.apache.spark.ml.feature.{StringIndexer, VectorAssembler}
 import org.apache.spark.ml.{Pipeline, PipelineStage}
-import org.apache.spark.ml.feature.VectorAssembler
-import org.apache.spark.{SparkConf, SparkContext}
-import org.apache.spark.sql.{DataFrame, SQLContext, SaveMode}
-import org.apache.spark.sql.functions.{avg, col, udf}
-import org.apache.spark.mllib.linalg.Vectors
-import org.apache.spark.sql.Column
-import org.apache.spark.sql.Row
-import org.apache.spark.sql.types.{IntegerType, StringType, StructField, StructType, LongType, DoubleType, ArrayType}
+import org.apache.spark.sql._
+import org.apache.spark.sql.functions.{avg, col}
+import org.apache.spark.sql.types._
 
 //import uk.gov.ons.dsc.fin.SICNaiveBayes.{cvModelName, indexer_label, modelNB, traingEval}
 
@@ -59,17 +54,17 @@ object SIC_RF {
 
 
 
-    //init
-    val conf = new SparkConf()
-                   .setAppName(appName)
-                   .setMaster(master)
-
-    val sc: SparkContext = new SparkContext(conf)
-    val sqlContext = new SQLContext(sc)
+    //init Session
+    val spark = SparkSession
+      .builder()
+      .master("yarn-client")
+      .appName("FinBins-SIC_RF")
+      .config("spark.some.config.option", "some-value")
+      .getOrCreate()
 
 
     //Load and Prep data
-    val fssIDBR = sqlContext.read.load("fss_idbr")
+    val fssIDBR = spark.read.load("fss_idbr")
       .withColumnRenamed("C5","SIC")
       .withColumnRenamed("C26","CompanyName")
       .withColumnRenamed("C32","AddressLine1")
@@ -102,9 +97,9 @@ object SIC_RF {
       if (counter >= startPos) {
         assembler.setInputCols(fCols)
 
-        val fssPred = traingEval(Array(assembler, indexer_label, modelRF.setFeaturesCol("features")), trainingData, testData, sqlContext)
+        val fssPred = traingEval(Array(assembler, indexer_label, modelRF.setFeaturesCol("features")), trainingData, testData, spark.sqlContext)
 
-        val accuracy: Double = fssPred.select(avg((col("numCorrect") / col("total")))).map { row => row.getDouble(0) }.first()
+        val accuracy: Double = fssPred.select(avg((col("numCorrect") / col("total")))).first().getDouble(0)
 
         fssPred.write.mode("overwrite").json("RF_SIC_results/resRF_"+fCols.mkString("_")+".json")
 
@@ -117,9 +112,9 @@ object SIC_RF {
 
     }
 
-    val parallelizedRows = sc.parallelize(output.toSeq)
+    val parallelizedRows = spark.sparkContext.parallelize(output.toSeq)
 
-    val resultDF = sqlContext.createDataFrame(parallelizedRows,resSchema)
+    val resultDF = spark.createDataFrame(parallelizedRows,resSchema)
 
     resultDF.write.mode(SaveMode.Overwrite).save("SIC_predictions_feature_sel_"+numFeatures.toString)
 
@@ -142,7 +137,7 @@ object SIC_RF {
 
       println("predictions_made ...")
 
-      predictions.registerTempTable("predictions")
+      predictions.createOrReplaceTempView("predictions")
 
       sqlContext.sql("select SIC, label, count(case when label = prediction then 1 end) as numCorrect, count(*) as total from predictions group by  SIC, label, prediction order by SIC, prediction asc ").repartition((1))
 

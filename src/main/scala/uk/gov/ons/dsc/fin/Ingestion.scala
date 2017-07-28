@@ -4,11 +4,9 @@ package uk.gov.ons.dsc.fin
   * Created by noyva on 03/05/2017.
   */
 
-import org.apache.spark.sql.SaveMode
-import uk.gov.ons.dsc.utils.stringmetric.StringMetric
 import org.apache.spark.sql.functions.udf
-import org.apache.spark.sql.types.{IntegerType, StringType, StructField, StructType, LongType, DoubleType}
-import org.apache.spark.{SparkConf, SparkContext}
+import org.apache.spark.sql.types._
+import org.apache.spark.sql.{SaveMode, SparkSession}
 
 
 
@@ -17,20 +15,23 @@ object Ingestion {
 
   def main (args:Array[String]):Unit = {
 
-    val appName = "FinBins-Ingestion"
-    //val master = args(0)
-    val master = "yarn-client"
+
+    val spark = SparkSession
+      .builder()
+      .master("yarn-client")
+      .appName("FinBins-Ingestion")
+      .config("spark.some.config.option", "some-value")
+      .getOrCreate()
 
 
-    val conf = new SparkConf().setAppName(appName).setMaster(master)
-    val sc: SparkContext = new SparkContext(conf)
-    val sqlContext = new org.apache.spark.sql.SQLContext(sc)
+   // val sqlContext = spark.sqlContext
 
 
 
 
 
-  val fss = sqlContext.read.format("com.databricks.spark.csv")
+  val fss = spark.read
+                       .format("com.databricks.spark.csv")
                        .option("header","true")
          //              .option("MODE","DROPMALFORMED")
          //              .option("quote","'")
@@ -44,7 +45,8 @@ object Ingestion {
     println("fss imported and saved. No of Records:" + fss.count())
 
 
-  val firms = sqlContext.read.format("com.databricks.spark.csv")
+  val firms = spark.read
+                       .format("com.databricks.spark.csv")
                        .option("header","true")
                        .option("delimiter","|")
                        .schema(firmsSchema)
@@ -69,18 +71,24 @@ object Ingestion {
   println("No of FCA firms records:"+firms1.count())
     firms1.write.mode(SaveMode.Overwrite).save("firms1")
 
-  val perms= sqlContext.read.format("com.databricks.spark.csv").option("header","true").option("delimiter","|").schema(permSchema).load("perm.txt")
+  val perms= spark.read
+                  .format("com.databricks.spark.csv")
+                  .option("header","true")
+                  .option("delimiter","|")
+                  .schema(permSchema)
+                  .load("perm.txt")
 
   //val firmPerm = perms.join(firms1,"firmId").sort("firmId")
     perms.write.mode(SaveMode.Overwrite).save("perms")
 
 
-  val idbr= sqlContext.read.format("com.databricks.spark.csv")
-                         .option("header","false")
-                         .option("delimiter",":")
+  val idbr= spark.read
+                 .format("com.databricks.spark.csv")
+                 .option("header","false")
+                 .option("delimiter",":")
                 //         .option("inferSchema","true")
-                         .schema(idbrSchema)
-                         .load("IDBR_266.txt")
+                 .schema(idbrSchema)
+                 .load("IDBR_266.txt")
 
   println("No of IDBR records:"+idbr.count())
 

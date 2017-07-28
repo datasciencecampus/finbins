@@ -1,15 +1,10 @@
 package uk.gov.ons.dsc.fin
 
-import org.apache.spark.{SparkConf, SparkContext}
-import org.apache.spark.ml.{Pipeline, PipelineStage}
 import org.apache.spark.ml.classification.NaiveBayes
-import uk.gov.ons.dsc.utils.stringmetric.StringMetric
-import org.apache.spark.sql.functions.udf
-import org.apache.spark.ml.feature.{CountVectorizer, StringIndexer, VectorAssembler}
-import org.apache.spark.sql.{DataFrame, SQLContext, SaveMode}
-import org.apache.spark.sql.functions.col
-import org.apache.spark.sql.functions.avg
-import org.apache.spark.sql.types.IntegerType
+import org.apache.spark.ml.feature.{CountVectorizer, StringIndexer}
+import org.apache.spark.ml.{Pipeline, PipelineStage}
+import org.apache.spark.sql.functions.{avg, col}
+import org.apache.spark.sql.{DataFrame, SQLContext, SaveMode, SparkSession}
 
 
 /**
@@ -33,9 +28,7 @@ object SICNaiveBayes {
 
   def main (args:Array[String]):Unit = {
 
-    val appName = "FinBins_PredictSIC_NaiveBayes"
-    //val master = args(0)
-    val master = "yarn-client"
+
     var ngram_size = 4
     if (args.length > 0) {
        ngram_size = args(1).toInt
@@ -43,9 +36,12 @@ object SICNaiveBayes {
 
 
 
-    val conf = new SparkConf().setAppName(appName).setMaster(master)
-    val sc: SparkContext = new SparkContext(conf)
-    val sqlContext = new SQLContext(sc)
+    val spark = SparkSession
+      .builder()
+      .master("yarn-client")
+      .appName("FinBins_PredictSIC_NaiveBayes")
+      .config("spark.some.config.option", "some-value")
+      .getOrCreate()
 
 
     def split(a: String): Array[String] = {
@@ -70,16 +66,16 @@ object SICNaiveBayes {
     }
 
 
-    sqlContext.udf.register("split", split1 _)
+    spark.udf.register("split", split1 _)
 
     //Load and Prep data
-    val firms_IDBR = sqlContext.read.load("idbr0")
+    val firms_IDBR = spark.read.load("idbr0")
                                     .withColumnRenamed("C5","SIC")
                                     .withColumnRenamed("C26","CompanyName")
                                     .withColumnRenamed("C32","AddressLine1")
                                     .dropDuplicates(Array("CompanyName"))
 
-    firms_IDBR.registerTempTable("firms_IDBR")
+    firms_IDBR.createOrReplaceTempView("firms_IDBR")
 
     /*
     val divisions = sqlContext.read.load ("sic_divisions")
@@ -94,21 +90,21 @@ object SICNaiveBayes {
     //val ngrams = sqlContext.sql("select CompanyName,CompanyNumber, split(CompanyName) as ngram_name , split(RegAddress_AddressLine1) as ngram_address , description, sector, division from company_divs").cache
 
 
-    val ngrams = sqlContext.sql("select CompanyName, split(CompanyName) as ngram_name , split(AddressLine1) as ngram_address , SIC from firms_IDBR").cache
+    val ngrams = spark.sql("select CompanyName, split(CompanyName) as ngram_name , split(AddressLine1) as ngram_address , SIC from firms_IDBR").cache
 
 
     ngrams.write.mode(SaveMode.Overwrite).save("ngram")
 
-    ngrams.registerTempTable("ngrams")
+    ngrams.createOrReplaceTempView("ngrams")
 
     val Array(trainingData, testData) = ngrams.randomSplit(Array(0.90, 0.10))
     trainingData.cache.count
     testData.cache.count
 
-    val namePred =traingEval(Array(cvModelName, indexer_label, modelNB.setFeaturesCol(cvModelName.getOutputCol)), trainingData, testData, sqlContext)
+    val namePred =traingEval(Array(cvModelName, indexer_label, modelNB.setFeaturesCol(cvModelName.getOutputCol)), trainingData, testData, spark.sqlContext)
     namePred.write.mode(SaveMode.Overwrite).save("predictions")
 
-    namePred.registerTempTable("namepred")
+    namePred.createOrReplaceTempView("namepred")
 
     // print the total accuracy
 
@@ -116,7 +112,7 @@ object SICNaiveBayes {
     namePred.select(avg( (col("numCorrect") / col("total")))).show
 
     println(" Results by SICs")
-    val accuracyBySIC = sqlContext.sql("select SIC , sum(numCorrect) as Correct, sum(total) as Total, sum(numCorrect)/sum(total) as Accuracy from namepred group by SIC order by Accuracy desc")
+    val accuracyBySIC = spark.sql("select SIC , sum(numCorrect) as Correct, sum(total) as Total, sum(numCorrect)/sum(total) as Accuracy from namepred group by SIC order by Accuracy desc")
     accuracyBySIC.write.mode(SaveMode.Overwrite).save("accuracyBySIC")
     accuracyBySIC.show
     }
@@ -131,7 +127,7 @@ object SICNaiveBayes {
 
     predictions.write.mode(SaveMode.Overwrite).save("predictions_raw")
 
-    predictions.registerTempTable("predictions")
+    predictions.createOrReplaceTempView("predictions")
 
     sqlContext.sql("select SIC, label, count(case when label = prediction then 1 end) as numCorrect, count(*) as total from predictions group by  SIC, label, prediction order by SIC, prediction asc ").repartition((1))
 

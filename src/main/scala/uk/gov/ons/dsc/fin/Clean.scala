@@ -1,7 +1,6 @@
 package uk.gov.ons.dsc.fin
 
-import org.apache.spark.{SparkConf, SparkContext}
-import uk.gov.ons.dsc.utils.stringmetric.StringMetric
+import org.apache.spark.sql.SparkSession
 import org.apache.spark.sql.functions._
 
 
@@ -12,16 +11,18 @@ object Clean {
 
   def main (args:Array[String]):Unit = {
 
-    val appName = "FinBins_cleaning"
-    //val master = args(0)
-    val master = "yarn-client"
 
 
-    val conf = new SparkConf().setAppName(appName).setMaster(master)
-    val sc: SparkContext = new SparkContext(conf)
-    val sqlContext = new org.apache.spark.sql.SQLContext(sc)
 
-    val firms_idbr = sqlContext.read.load("firms_idbr")
+    val spark = SparkSession
+      .builder()
+      .master("yarn-client")
+      .appName("FinBins_cleaning")
+      .config("spark.some.config.option", "some-value")
+      .getOrCreate()
+
+
+    val firms_idbr = spark.read.load("firms_idbr")
 
     val clean_firms_idbr = firms_idbr.sort(col("nameDist")+col("addrDist"))
       .dropDuplicates(Array("name2"))

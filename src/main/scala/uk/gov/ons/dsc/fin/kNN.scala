@@ -3,8 +3,7 @@ package uk.gov.ons.dsc.fin
 import org.apache.spark.ml.Pipeline
 import org.apache.spark.ml.classification.KNNClassifier
 import org.apache.spark.ml.feature.{PCA, VectorAssembler}
-import org.apache.spark.sql.DataFrame
-import org.apache.spark.{SparkConf, SparkContext}
+import org.apache.spark.sql.{DataFrame, SparkSession}
 
 /**
   * Created by noyva on 09/06/2017.
@@ -15,16 +14,19 @@ object kNN {
 
   def main (args:Array[String]):Unit = {
 
-    val appName = "FinBins_kNN"
+    val appName = "FinBins_k-NN"
     //val master = args(0)
     val master = "yarn-client"
 
 
-    val conf = new SparkConf().setAppName(appName).setMaster(master)
-    val sc: SparkContext = new SparkContext(conf)
-    val sqlContext = new org.apache.spark.sql.SQLContext(sc)
+    val spark = SparkSession
+      .builder()
+      .master("yarn-client")
+      .appName("FinBins_k-NN")
+      .config("spark.some.config.option", "some-value")
+      .getOrCreate()
 
-    val fss_idbr = sqlContext.read.load("fss_idbr")
+    val fss_idbr = spark.read.load("fss_idbr")
 
     val assembler = new VectorAssembler()
       .setInputCols(Array("q1001", "q1002", "q1003","q1004" )) // NB assemble them automatically
