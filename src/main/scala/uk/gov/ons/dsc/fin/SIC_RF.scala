@@ -57,7 +57,7 @@ object SIC_RF {
     //init Session
     val spark = SparkSession
       .builder()
-      .master("yarn-client")
+      .master("yarn")
       .appName("FinBins-SIC_RF")
       .config("spark.some.config.option", "some-value")
       .getOrCreate()

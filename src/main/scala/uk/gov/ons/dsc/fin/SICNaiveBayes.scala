@@ -38,7 +38,7 @@ object SICNaiveBayes {
 
     val spark = SparkSession
       .builder()
-      .master("yarn-client")
+      .master("yarn")
       .appName("FinBins_PredictSIC_NaiveBayes")
       .config("spark.some.config.option", "some-value")
       .getOrCreate()

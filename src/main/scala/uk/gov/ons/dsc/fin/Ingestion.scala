@@ -18,7 +18,8 @@ object Ingestion {
 
     val spark = SparkSession
       .builder()
-      .master("yarn-client")
+      .master("yarn")
+    //  .deploy-mode("client")
       .appName("FinBins-Ingestion")
     //  .set("spark.cores.max", "25")
       .config("spark.some.config.option", "some-value")

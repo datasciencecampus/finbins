@@ -16,7 +16,7 @@ object Clean {
 
     val spark = SparkSession
       .builder()
-      .master("yarn-client")
+      .master("yarn")
       .appName("FinBins_cleaning")
       .config("spark.some.config.option", "some-value")
       .getOrCreate()

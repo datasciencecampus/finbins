@@ -14,7 +14,7 @@ object LinkFCA_IDBR {
 
     val appName = "FinBins_LinkFCA_IDBR"
     //val master = args(0)
-    val master = "yarn-client"
+    val master = "yarn"
 
 
     val spark = SparkSession

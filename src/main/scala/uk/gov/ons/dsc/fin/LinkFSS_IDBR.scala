@@ -11,7 +11,7 @@ object LinkFSS_IDBR {
 
     val appName = "FinBins_FSS_IDBR Linking"
     //val master = args(0)
-    val master = "yarn-client"
+    val master = "yarn"
 
 
     val spark = SparkSession

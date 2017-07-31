@@ -16,7 +16,7 @@ object kNN {
 
     val appName = "FinBins_k-NN"
     //val master = args(0)
-    val master = "yarn-client"
+    val master = "yarn"
 
 
     val spark = SparkSession
