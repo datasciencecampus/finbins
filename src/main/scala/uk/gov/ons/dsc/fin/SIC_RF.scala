@@ -44,13 +44,12 @@ object SIC_RF {
 
   def  main(args:Array[String]):Unit = {
 
-    val appName = "FinBins_PredictSIC_RF_restricted"
+   println("Agruments format is: numFeatures StartPos endPos in the generated comb secuence ")
+
 
     val numFeatures = args(0).toInt // number of features in the RF classifier
     val startPos    = args(1).toInt    // starting combination
     val endComb     = args(2).toInt   // end combination
-
-    val master = "yarn-client"
 
 
 
@@ -71,7 +70,7 @@ object SIC_RF {
       // .withColumn("features")
       //   .withColumn("features",toVec4(fssIDBR(""),fssIDBR("")))
       .dropDuplicates(Array("CompanyName"))
-    .na.fill(0)
+      .na.fill(0)
 
     val featureCols = fssIDBR.dtypes.filter(f=>  f._2=="DoubleType").map(f=>f._1)
 
@@ -83,8 +82,8 @@ object SIC_RF {
 
 
     val Array(trainingData, testData) = fssIDBR.randomSplit(Array(0.90, 0.10))
-    trainingData.cache.count
-    testData.cache.count
+    trainingData.cache
+    testData.cache
 
     var output = scala.collection.mutable.ListBuffer.empty[Row]
 
@@ -114,7 +113,7 @@ object SIC_RF {
 
     val parallelizedRows = spark.sparkContext.parallelize(output.toSeq)
 
-    val resultDF = spark.createDataFrame(parallelizedRows,resSchema)
+    val resultDF = spark.createDataFrame(parallelizedRows,resSchema).sort(col("accuracy"))
 
     resultDF.write.mode(SaveMode.Overwrite).save("SIC_predictions_feature_sel_"+numFeatures.toString)
 
