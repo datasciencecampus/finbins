@@ -13,21 +13,24 @@ lazy val root = (project in file(".")).
 /*libraryDependencies += "com.rockymadden.stringmetric" %% "stringmetric-core" % "0.27.4" */
 
 libraryDependencies ++= Seq(
-  "org.apache.spark" %% "spark-core" % "2.1.0" % "provided" ,
-  "org.apache.spark" %% "spark-sql" % "2.1.0" % "provided" ,
-  "org.apache.spark" %% "spark-mllib" % "2.1.0" % "provided"
+  "org.apache.spark" %% "spark-core" % "2.1.0"  ,
+  "org.apache.spark" %% "spark-sql" % "2.1.0"  ,
+  "org.apache.spark" %% "spark-mllib" % "2.1.0"
 )
 
-
+/*
 //META-INF discarding
 assemblyMergeStrategy in assembly := {
-  case PathList("javax", "servlet", xs @ _*)         => MergeStrategy.first
-  case PathList(ps @ _*) if ps.last endsWith ".html" => MergeStrategy.first
+  case PathList("META-INF",  xs @ _*)                => MergeStrategy.discard
+  case PathList(ps @ _*)                             => MergeStrategy.first
   case "application.conf"                            => MergeStrategy.concat
   case "unwanted.txt"                                => MergeStrategy.discard
-  case x =>
-    val oldStrategy = (assemblyMergeStrategy in assembly).value
-    oldStrategy(x)
+  case x                                             => MergeStrategy.first
+ //   val oldStrategy = (assemblyMergeStrategy in assembly).value
+ //   oldStrategy(x)
+
+
 }
 
+*/
         

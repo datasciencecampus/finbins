@@ -20,6 +20,7 @@ object Ingestion {
       .builder()
       .master("yarn-client")
       .appName("FinBins-Ingestion")
+    //  .set("spark.cores.max", "25")
       .config("spark.some.config.option", "some-value")
       .getOrCreate()
 
