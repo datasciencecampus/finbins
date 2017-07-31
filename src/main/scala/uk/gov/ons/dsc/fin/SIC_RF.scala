@@ -113,7 +113,7 @@ object SIC_RF {
 
     val parallelizedRows = spark.sparkContext.parallelize(output.toSeq)
 
-    val resultDF = spark.createDataFrame(parallelizedRows,resSchema).sort(col("accuracy"))
+    val resultDF = spark.createDataFrame(parallelizedRows,resSchema).sort(col("accuracy").desc)
 
     resultDF.write.mode(SaveMode.Overwrite).save("SIC_predictions_feature_sel_"+numFeatures.toString)
 
