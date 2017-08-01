@@ -112,13 +112,13 @@ object SIC_RF {
 
         assembler.setInputCols(fCols)
 
-        println("t1")
+        //println("t1")
         val fssPred = traingEval(Array(assembler, indexer_label, modelRF.setFeaturesCol("features")), trainingData, testData, spark.sqlContext)
-        println("t2")
+        //println("t2")
         val accuracy: Double = fssPred.select(avg((col("numCorrect") / col("total")))).first().getDouble(0)
-        println("t3")
+        //println("t3")
         fssPred.write.mode("overwrite").json("RF_SIC_results/resRF_SIC_"+SICchars+"_" +fCols.mkString("_")+".json")
-        println("t4")
+        //println("t4")
         println("No:" + counter.toString + " accuracy for features:" + fCols.mkString(",") + " is:" + accuracy)
 
         output = output :+ Row(fCols.mkString(","), accuracy)
@@ -145,11 +145,11 @@ object SIC_RF {
     def traingEval(stages: Array[PipelineStage], trainingData: DataFrame, testData:DataFrame, sqlContext: SQLContext): DataFrame= {
       val pipeline = new Pipeline()
         .setStages(stages)
-
+       println("t1")
       val model = pipeline.fit(trainingData)
-
+       println("t2")
       val predictions = model.transform(testData)
-
+       println("t3")
       // predictions.write.mode(SaveMode.Overwrite).save("predictions_RF_raw")
 
       println("predictions_made ...")
