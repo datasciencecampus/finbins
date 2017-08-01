@@ -157,7 +157,7 @@ object SIC_RF {
       // println("t3")
       // predictions.write.mode(SaveMode.Overwrite).save("predictions_RF_raw")
 
-      println("predictions_made ...")
+      println("predictions_made  ...")
 
       predictions.createOrReplaceTempView("predictions")
 
