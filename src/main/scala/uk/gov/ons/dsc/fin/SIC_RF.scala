@@ -103,11 +103,13 @@ object SIC_RF {
 
     var fCols:Array[String] = null
 
-    while (featuresCombIter.hasNext && counter <= endComb) {
+    while (featuresCombIter.hasNext  && counter < endComb) {
 
       fCols = featuresCombIter.next()
 
-      if (counter >= startPos) {
+      if (counter >= startPos && fCols != null && !fCols.isEmpty) {
+        println ("Processing:"+fCols.mkString(","))
+
         assembler.setInputCols(fCols)
 
         val fssPred = traingEval(Array(assembler, indexer_label, modelRF.setFeaturesCol("features")), trainingData, testData, spark.sqlContext)
