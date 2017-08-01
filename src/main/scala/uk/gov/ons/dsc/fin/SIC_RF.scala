@@ -49,15 +49,18 @@ object SIC_RF {
 
   def  main(args:Array[String]):Unit = {
 
-   println("Agruments format is: numFeatures StartPos endPos SIC_chars ")
+   println("Agruments format is: numFeatures StartPos endPos SIC_chars startCol")
 
 
     val numFeatures = args(0).toInt // number of features in the RF classifier
     val startPos    = args(1).toInt    // starting combination
     val endComb     = args(2).toInt   // end combination
     val SICchars       = args(3).toInt   // number of chars used in SIC code - max is 5
+    val startCol      = args(4)
 
-  println("Running with: numFeatures:"+numFeatures+ " StartPos: "+startPos+ " endPos:"+endComb+ " SIC_chars:"+SICchars)
+
+
+  println("Running with: numFeatures:"+numFeatures+ " StartPos: "+startPos+ " endPos:"+endComb+ " SIC_chars:"+SICchars + " Start col:"+ startCol )
 
     //init Session
     val spark = SparkSession
@@ -86,11 +89,11 @@ object SIC_RF {
       .dropDuplicates(Array("CompanyName"))
       .na.fill(0)
 
-    val featureCols = fssIDBR.dtypes.filter(f=>  f._2=="DoubleType").map(f=>f._1)
+    val featureCols = fssIDBR.dtypes.filter(f=>  f._2=="DoubleType").map(f=>f._1).filter(f=>f>=startCol )
 
     val featuresCombIter = featureCols.combinations(numFeatures)
 
-    var counter:Long = 1
+    var counter:Long = 0
 
     fssIDBR.registerTempTable("fss_idbr")
 
@@ -145,9 +148,9 @@ object SIC_RF {
     def traingEval(stages: Array[PipelineStage], trainingData: DataFrame, testData:DataFrame, sqlContext: SQLContext): DataFrame= {
       val pipeline = new Pipeline()
                         .setStages(stages)
-       println("t1")
+      // println("t1")
       val model = pipeline.fit(trainingData)
-       println("t2")
+      // println("t2")
       val predictions = model.transform(testData)
        println("t3")
       // predictions.write.mode(SaveMode.Overwrite).save("predictions_RF_raw")
