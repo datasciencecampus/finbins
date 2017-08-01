@@ -57,7 +57,7 @@ object SIC_RF {
     val endComb     = args(2).toInt   // end combination
     val SICchars       = args(3).toInt   // number of chars used in SIC code - max is 5
 
-  println("Running with: numFeatures:"+numFeatures+ " StartPos:"+startPos+ "endPos:"+endComb+ "SIC_chars:"+SICchars)
+  println("Running with: numFeatures:"+numFeatures+ " StartPos: "+startPos+ "endPos:"+endComb+ "SIC_chars:"+SICchars)
 
     //init Session
     val spark = SparkSession
@@ -112,12 +112,13 @@ object SIC_RF {
 
         assembler.setInputCols(fCols)
 
+        println("t1")
         val fssPred = traingEval(Array(assembler, indexer_label, modelRF.setFeaturesCol("features")), trainingData, testData, spark.sqlContext)
-
+        println("t2")
         val accuracy: Double = fssPred.select(avg((col("numCorrect") / col("total")))).first().getDouble(0)
-
+        println("t3")
         fssPred.write.mode("overwrite").json("RF_SIC_results/resRF_SIC_"+SICchars+"_" +fCols.mkString("_")+".json")
-
+        println("t4")
         println("No:" + counter.toString + " accuracy for features:" + fCols.mkString(",") + " is:" + accuracy)
 
         output = output :+ Row(fCols.mkString(","), accuracy)
