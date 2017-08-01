@@ -57,7 +57,7 @@ object SIC_RF {
     val endComb     = args(2).toInt   // end combination
     val SICchars       = args(3).toInt   // number of chars used in SIC code - max is 5
 
-  println("Running with: numFeatures:"+numFeatures+ " StartPos: "+startPos+ "endPos:"+endComb+ "SIC_chars:"+SICchars)
+  println("Running with: numFeatures:"+numFeatures+ " StartPos: "+startPos+ " endPos:"+endComb+ " SIC_chars:"+SICchars)
 
     //init Session
     val spark = SparkSession
@@ -90,7 +90,7 @@ object SIC_RF {
 
     val featuresCombIter = featureCols.combinations(numFeatures)
 
-    var counter:Long = 0
+    var counter:Long = 1
 
     fssIDBR.registerTempTable("fss_idbr")
 
@@ -144,7 +144,7 @@ object SIC_RF {
 
     def traingEval(stages: Array[PipelineStage], trainingData: DataFrame, testData:DataFrame, sqlContext: SQLContext): DataFrame= {
       val pipeline = new Pipeline()
-        .setStages(stages)
+                        .setStages(stages)
        println("t1")
       val model = pipeline.fit(trainingData)
        println("t2")
