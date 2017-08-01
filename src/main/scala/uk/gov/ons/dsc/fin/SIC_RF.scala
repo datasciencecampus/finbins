@@ -101,11 +101,11 @@ object SIC_RF {
 
     var output = scala.collection.mutable.ListBuffer.empty[Row]
 
-    var fCols:Array[String] = null
+
 
     while (featuresCombIter.hasNext  && counter < endComb) {
 
-      fCols = featuresCombIter.next()
+      val fCols:Array[String]  = featuresCombIter.next()
 
       if (counter >= startPos && fCols != null && !fCols.isEmpty) {
         println ("Processing:"+fCols.mkString(","))
