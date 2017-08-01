@@ -93,9 +93,11 @@ object SIC_RF {
 
     val featuresCombIter = featureCols.combinations(numFeatures)
 
+    println("Number of combinations:"+featuresCombIter.size)
+
     var counter:Long = 0
 
-    fssIDBR.registerTempTable("fss_idbr")
+    fssIDBR.createOrReplaceTempView("fss_idbr")
 
 
     val Array(trainingData, testData) = fssIDBR.randomSplit(Array(0.90, 0.10))
@@ -136,7 +138,7 @@ object SIC_RF {
     val resultDF = spark.createDataFrame(parallelizedRows,resSchema).sort(col("accuracy").desc)
 
     // save the resulting table
-    resultDF.write.mode(SaveMode.Overwrite).save("SIC_predictions_feature_sel_"+numFeatures.toString+" SIC chars:"+SICchars)
+    resultDF.write.mode(SaveMode.Overwrite).save("SIC_predictions_feature_sel_"+numFeatures.toString+"_SIC"+SICchars)
 
     println("All done! Number of feature combinations saved:"+resultDF.count())
     resultDF.show (100)
@@ -152,7 +154,7 @@ object SIC_RF {
       val model = pipeline.fit(trainingData)
       // println("t2")
       val predictions = model.transform(testData)
-       println("t3")
+      // println("t3")
       // predictions.write.mode(SaveMode.Overwrite).save("predictions_RF_raw")
 
       println("predictions_made ...")
