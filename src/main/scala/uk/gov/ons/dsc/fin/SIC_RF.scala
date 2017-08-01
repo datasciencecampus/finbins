@@ -93,7 +93,7 @@ object SIC_RF {
 
     val featuresCombIter = featureCols.combinations(numFeatures)
 
-    println("Number of combinations:"+featuresCombIter.size)
+    //println("Number of combinations:"+featuresCombIter.size)
 
     var counter:Long = 0
 
