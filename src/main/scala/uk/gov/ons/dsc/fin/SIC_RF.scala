@@ -6,6 +6,7 @@ import org.apache.spark.ml.{Pipeline, PipelineStage}
 import org.apache.spark.sql._
 import org.apache.spark.sql.functions.{avg, col}
 import org.apache.spark.sql.types._
+import org.apache.spark.sql.functions.udf
 
 //import uk.gov.ons.dsc.fin.SICNaiveBayes.{cvModelName, indexer_label, modelNB, traingEval}
 
@@ -14,14 +15,18 @@ import org.apache.spark.sql.types._
   */
 object SIC_RF {
 
+
+
   // features
   val assembler = new VectorAssembler()
     .setOutputCol("features")
 
   // labels
   val indexer_label = new StringIndexer()
-    .setInputCol("SIC")
+    .setInputCol("Sub_SIC")
     .setOutputCol("label")
+
+
 
 
   //model
@@ -31,7 +36,7 @@ object SIC_RF {
                               .setImpurity("gini")
                               .setMaxDepth(4)
                               .setMaxBins(32)
-                           //   .setFeaturesCol("features")
+
 
   //result schema
   val resSchema = StructType(
@@ -44,14 +49,15 @@ object SIC_RF {
 
   def  main(args:Array[String]):Unit = {
 
-   println("Agruments format is: numFeatures StartPos endPos in the generated comb secuence ")
+   println("Agruments format is: numFeatures StartPos endPos SIC_chars ")
 
 
     val numFeatures = args(0).toInt // number of features in the RF classifier
     val startPos    = args(1).toInt    // starting combination
     val endComb     = args(2).toInt   // end combination
+    val SICchars       = args(3).toInt   // number of chars used in SIC code - max is 5
 
-
+  println("Running with: numFeatures:"+numFeatures+ " StartPos:"+startPos+ "endPos:"+endComb+ "SIC_chars:"+SICchars)
 
     //init Session
     val spark = SparkSession
@@ -62,12 +68,20 @@ object SIC_RF {
       .getOrCreate()
 
 
+
+  def subsringFn (str:String) = {
+    str.take(SICchars)
+  }
+
+    //define UDF
+    val substrSIC = udf (subsringFn _)
+
     //Load and Prep data
     val fssIDBR = spark.read.load("fss_idbr")
       .withColumnRenamed("C5","SIC")
       .withColumnRenamed("C26","CompanyName")
       .withColumnRenamed("C32","AddressLine1")
-      // .withColumn("features")
+      .withColumn("Sub_SIC", substrSIC (col("SIC")))
       //   .withColumn("features",toVec4(fssIDBR(""),fssIDBR("")))
       .dropDuplicates(Array("CompanyName"))
       .na.fill(0)
@@ -100,7 +114,7 @@ object SIC_RF {
 
         val accuracy: Double = fssPred.select(avg((col("numCorrect") / col("total")))).first().getDouble(0)
 
-        fssPred.write.mode("overwrite").json("RF_SIC_results/resRF_"+fCols.mkString("_")+".json")
+        fssPred.write.mode("overwrite").json("RF_SIC_results/resRF_SIC_"+SICchars+"_" +fCols.mkString("_")+".json")
 
         println("No:" + counter.toString + " accuracy for features:" + fCols.mkString(",") + " is:" + accuracy)
 
@@ -115,9 +129,10 @@ object SIC_RF {
 
     val resultDF = spark.createDataFrame(parallelizedRows,resSchema).sort(col("accuracy").desc)
 
-    resultDF.write.mode(SaveMode.Overwrite).save("SIC_predictions_feature_sel_"+numFeatures.toString)
+    // save the resulting table
+    resultDF.write.mode(SaveMode.Overwrite).save("SIC_predictions_feature_sel_"+numFeatures.toString+" SIC chars:"+SICchars)
 
-    println("Number of feature combinations saved:"+resultDF.count())
+    println("All done! Number of feature combinations saved:"+resultDF.count())
     resultDF.show (100)
 
 
