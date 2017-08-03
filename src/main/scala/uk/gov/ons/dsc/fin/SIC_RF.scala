@@ -76,7 +76,7 @@ object SIC_RF {
     str.take(SICchars)
   }
 
-    //define UDF
+    //define UDF for SIC truncating
     val substrSIC = udf (subsringFn _)
 
     //Load and Prep data

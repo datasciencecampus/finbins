@@ -3,7 +3,7 @@ package uk.gov.ons.dsc.fin
 import org.apache.spark.ml.classification.RandomForestClassifier
 import org.apache.spark.ml.feature.{StringIndexer, VectorAssembler}
 import org.apache.spark.ml.{Pipeline, PipelineStage}
-import org.apache.spark.sql.functions.{avg, col}
+import org.apache.spark.sql.functions.{avg, col, udf}
 import org.apache.spark.sql.{DataFrame, SQLContext, SaveMode, SparkSession}
 
 /**
@@ -36,7 +36,7 @@ object SIC_RF_SINGL {
   def  main(args:Array[String]):Unit = {
 
     val appName = "FinBins_PredictSIC_RF_singleModel"
-    val numFeatures = args.length
+    val numFeatures = args.length - 1
 
     /*
     val fCols:Array[String] = numFeatures match {
@@ -49,11 +49,10 @@ object SIC_RF_SINGL {
 
     }
     */
-
-    val fCols = args
-
-    //val master = args(0)
-    val master = "yarn-client"
+    val SICchars = args(0).toInt
+    val fCols = args.drop(1)
+    println("usage: NoSICChars feature1 feature2 feature3 ....")
+    println("Running with SIC"+SICchars + " and features:"+ fCols )
 
 
 
@@ -66,6 +65,13 @@ object SIC_RF_SINGL {
       .getOrCreate()
 
     import spark.implicits._
+
+    def subsringFn (str:String) = {
+      str.take(SICchars)
+    }
+
+    //define UDF for SIC truncating
+    val substrSIC = udf (subsringFn _)
 
 
     //Load and Prep data
@@ -92,7 +98,7 @@ object SIC_RF_SINGL {
     val fssPred =traingEval(Array( assembler,indexer_label, modelRF.setFeaturesCol("features")), trainingData, testData, spark.sqlContext)
     fssPred.write.mode(SaveMode.Overwrite).save("SIC_predictionsFrom"+fCols.mkString("_"))
 
-    fssPred.write.mode("overwrite").json("RF_SIC_results/resRF_"+fCols.mkString("_")+".json")
+    fssPred.write.mode("overwrite").json("RF_SIC_results/resRF_SIC_"+SICchars+"_" +fCols.mkString("_")+".json")
 
 
     println ("Results for features:"+ fCols.mkString(",") )
