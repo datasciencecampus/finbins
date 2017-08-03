@@ -18,7 +18,7 @@ object SIC_RF_SINGL {
 
   // labels
   val indexer_label = new StringIndexer()
-    .setInputCol("SIC")
+    .setInputCol("Sub_SIC")
     .setOutputCol("label")
 
 
@@ -52,7 +52,7 @@ object SIC_RF_SINGL {
     val SICchars = args(0).toInt
     val fCols = args.drop(1)
     println("usage: NoSICChars feature1 feature2 feature3 ....")
-    println("Running with SIC"+SICchars + " and features:"+ fCols )
+    println("Running with SIC"+SICchars + " and features:"+ fCols.mkString(",") )
 
 
 
@@ -79,6 +79,7 @@ object SIC_RF_SINGL {
       .withColumnRenamed("C5","SIC")
       .withColumnRenamed("C26","CompanyName")
       .withColumnRenamed("C32","AddressLine1")
+      .withColumn("Sub_SIC", substrSIC (col("SIC")))
       // .withColumn("features")
       //   .withColumn("features",toVec4(fssIDBR(""),fssIDBR("")))
       .dropDuplicates(Array("CompanyName"))
@@ -127,7 +128,7 @@ object SIC_RF_SINGL {
 
     predictions.createOrReplaceTempView("predictions")
 
-    sqlContext.sql("select SIC, label, count(case when label = prediction then 1 end) as numCorrect, count(*) as total from predictions group by  SIC, label, prediction order by SIC, prediction asc ").repartition((1))
+    sqlContext.sql("select SIC, label, count(case when label = prediction then 1 end) as numCorrect, count(*) as total from predictions group by  Sub_SIC, label, prediction order by Sub_SIC, prediction asc ").repartition((1))
 
   }
 
