@@ -128,7 +128,7 @@ object SIC_RF_SINGL {
 
     predictions.createOrReplaceTempView("predictions")
 
-    sqlContext.sql("select SIC, label, count(case when label = prediction then 1 end) as numCorrect, count(*) as total from predictions group by  Sub_SIC, label, prediction order by Sub_SIC, prediction asc ").repartition((1))
+    sqlContext.sql("select Sub_SIC, label, count(case when label = prediction then 1 end) as numCorrect, count(*) as total from predictions group by  Sub_SIC, label, prediction order by Sub_SIC, prediction asc ").repartition((1))
 
   }
 
