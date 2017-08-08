@@ -38,18 +38,12 @@ object SIC_RF_SINGL {
     val appName = "FinBins_PredictSIC_RF_singleModel"
     val numFeatures = args.length - 1
 
-    /*
-    val fCols:Array[String] = numFeatures match {
-      case 1 => Array(args(0))
-      case 2 => Array(args(0), args(1))
-      case 3 => Array(args(0), args(1), args(2))
-      case 4 => Array(args(0), args(1), args(2), args(3))
-      case 5 => Array(args(0), args(1), args(2), args(3), args(4))
-      case 5 => Array(args(0), args(1), args(2), args(3), args(4), args(5) )
-
+    if (numFeatures <= 0) {
+      println("Not enoiugh arguments. Exiting ....")
+      sys.exit()
     }
-    */
-    val SICchars = args(0).toInt
+
+    val SICchars = try {args(3).toInt} catch {case e:Exception => println ("exception parcing number of chars used in SIC code: " + e); 5}
     val fCols = args.drop(1)
     println("usage: NoSICChars feature1 feature2 feature3 ....")
     println("Running with SIC"+SICchars + " and features:"+ fCols.mkString(",") )

@@ -52,11 +52,11 @@ object SIC_RF {
    println("Agruments format is: numFeatures StartPos endPos SIC_chars startCol")
 
 
-    val numFeatures = args(0).toInt // number of features in the RF classifier
-    val startPos    = args(1).toInt    // starting combination
-    val endComb     = args(2).toInt   // end combination
-    val SICchars       = args(3).toInt   // number of chars used in SIC code - max is 5
-    val startCol      = args(4)
+    val numFeatures = try {args(0).toInt} catch {case e:Exception => println ("exception parcing number of features: " + e); 2}  // number of features in the RF classifier
+    val startPos    = try {args(1).toInt} catch {case e:Exception => println ("exception parcing starting combination: " + e); 0} // starting combination
+    val endComb     = try {args(2).toInt} catch {case e:Exception => println ("exception parcing end combination: " + e); 2500}   // end combination
+    val SICchars    = try {args(3).toInt} catch {case e:Exception => println ("exception parcing number of chars used in SIC code: " + e); 5}   // number of chars used in SIC code - max is 5
+    val startCol    = try {args(4)} catch {case e:Exception => println ("exception parcing start col: " + e); "A"}
 
 
 
