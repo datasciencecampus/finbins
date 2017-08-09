@@ -80,12 +80,10 @@ object SIC_RF {
 
     //Load and Prep data
     val fssIDBR = spark.read.load("fss_idbr")
-      .withColumnRenamed("C5","SIC")
-      .withColumnRenamed("C26","CompanyName")
-      .withColumnRenamed("C32","AddressLine1")
+      .withColumnRenamed("frosic207","SIC")
       .withColumn("Sub_SIC", substrSIC (col("SIC")))
       //   .withColumn("features",toVec4(fssIDBR(""),fssIDBR("")))
-      .dropDuplicates(Array("CompanyName"))
+      //.dropDuplicates(Array("CompanyName"))
       .na.fill(0)
 
     val featureCols = fssIDBR.dtypes.filter(f=>  f._2=="DoubleType").map(f=>f._1).filter(f=>f>=startCol )
