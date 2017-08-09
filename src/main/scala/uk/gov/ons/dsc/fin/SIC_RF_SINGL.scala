@@ -3,7 +3,7 @@ package uk.gov.ons.dsc.fin
 import org.apache.spark.ml.classification.RandomForestClassifier
 import org.apache.spark.ml.feature.{StringIndexer, VectorAssembler}
 import org.apache.spark.ml.{Pipeline, PipelineStage}
-import org.apache.spark.sql.functions.{avg, col, udf}
+import org.apache.spark.sql.functions.{col, udf}
 import org.apache.spark.sql.{DataFrame, SQLContext, SaveMode, SparkSession}
 
 /**
@@ -58,8 +58,6 @@ object SIC_RF_SINGL {
       .config("spark.some.config.option", "some-value")
       .getOrCreate()
 
-    import spark.implicits._
-
     def subsringFn (str:String) = {
       str.take(SICchars)
     }
@@ -95,13 +93,15 @@ object SIC_RF_SINGL {
 
     fssPred.write.mode("overwrite").json("RF_SIC_results/resRF_SIC_"+SICchars+"_" +fCols.mkString("_")+".json")
 
+    fssPred.createGlobalTempView("pred")
 
     println ("Results for features:"+ fCols.mkString(",") )
     fssPred.show(50)
 
     println ("Results for features:"+ fCols.mkString(",") )
 
-    val accuracy: Double = fssPred.select(avg((col("numCorrect") / col("total")))).map { row => row.getDouble(0) }.first()
+
+    val accuracy: Double = spark.sql("select sum(numCorrect)/sum(total) as accuracy").first.getDouble(0)
 
     println( " Accuracy for features:" + fCols.mkString(",") + " is:" + accuracy)
 
