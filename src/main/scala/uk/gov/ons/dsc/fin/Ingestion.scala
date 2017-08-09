@@ -41,6 +41,7 @@ object Ingestion {
          //               .option("inferSchema","true")
                        .option("delimiter","|")
                        .load("fss.csv")
+                       .drop("Region")
 
     fss.write.mode(SaveMode.Overwrite).save("fss0")
 
