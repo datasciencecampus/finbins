@@ -16,7 +16,7 @@ object LinkFSS_IDBR {
 
     val spark = SparkSession
       .builder()
-      .master("yarn-client")
+      .master("yarn")
       .appName("FinBins-Ingestion")
       .config("spark.some.config.option", "some-value")
       .getOrCreate()
@@ -33,7 +33,7 @@ object LinkFSS_IDBR {
     println("No of fss records:"+fss.count())
     */
 
-    val idbr = spark.read.load("idbrAll")
+    val idbr = spark.read.load("idbrAll0")
 
     val fss = spark.read.load("fss0")
 

@@ -110,16 +110,6 @@ object Ingestion {
     idbr.write.mode(SaveMode.Overwrite).save("idbrAlL0")
 
 
-
-
-
-  println("No of fss records:"+fss.count())
-
-
-
-
-
-
   }
 
   val idbrSchema = StructType(Array(
