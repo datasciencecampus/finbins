@@ -37,7 +37,7 @@ object LinkFSS_IDBR {
 
     val fss = spark.read.load("fss0")
 
-    val joinExpr = fss.col("RUReference") === idbr.col("ruref")
+    val joinExpr = fss.col("RUReference") === idbr.col("Id")
 
     val fss_idbr = fss.join(idbr,joinExpr)
 
