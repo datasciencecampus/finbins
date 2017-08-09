@@ -107,7 +107,7 @@ object Ingestion {
 
     println("No of IDBR All records:"+idbrAll.count())
 
-    idbr.write.mode(SaveMode.Overwrite).save("idbrAll0")
+    idbrAll.write.mode(SaveMode.Overwrite).save("idbrAll0")
 
 
   }
