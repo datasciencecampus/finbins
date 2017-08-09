@@ -43,7 +43,7 @@ object SIC_RF_SINGL {
       sys.exit()
     }
 
-    val SICchars = try {args(3).toInt} catch {case e:Exception => println ("exception parcing number of chars used in SIC code: " + e); 5}
+    val SICchars = try {args(0).toInt} catch {case e:Exception => println ("exception parcing number of SIC chars used in SIC code: " + e); 5}
     val fCols = args.drop(1)
     println("usage: NoSICChars feature1 feature2 feature3 ....")
     println("Running with SIC"+SICchars + " and features:"+ fCols.mkString(",") )
@@ -93,7 +93,7 @@ object SIC_RF_SINGL {
 
     fssPred.write.mode("overwrite").json("RF_SIC_results/resRF_SIC_"+SICchars+"_" +fCols.mkString("_")+".json")
 
-    fssPred.createGlobalTempView("pred")
+    fssPred.createOrReplaceTempView("pred")
 
     println ("Results for features:"+ fCols.mkString(",") )
     fssPred.show(50)
