@@ -105,6 +105,8 @@ object SIC_RF_SINGL {
 
     println( " Accuracy for features:" + fCols.mkString(",") + " is:" + accuracy)
 
+    sys.exit()
+
   }
 
 

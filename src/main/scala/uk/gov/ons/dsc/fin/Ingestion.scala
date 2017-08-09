@@ -95,12 +95,27 @@ object Ingestion {
   println("No of IDBR records:"+idbr.count())
 
     idbr.write.mode(SaveMode.Overwrite).save("idbr0")
-  //val fss=  sqlContext.read.format("com.databricks.spark.csv").option("header","true").option("delimiter","|").option("inferSchema","true").load("fss.txt")
-  //  fss.write.save("fss0")
 
-  //val fssIDBR = fss.join(idbr,fss("RUReference")===idbr("C0"))
+
+    val idbrAll= spark.read
+      .format("com.databricks.spark.csv")
+      .option("header","true")
+      .option("delimiter",",")
+               .option("inferSchema","true")
+      //.schema(idbrSchema)
+      .load("IDBR_All.csv")
+
+    println("No of IDBR All records:"+idbrAll.count())
+
+    idbr.write.mode(SaveMode.Overwrite).save("idbrAlL0")
+
+
+
+
 
   println("No of fss records:"+fss.count())
+
+
 
 
 

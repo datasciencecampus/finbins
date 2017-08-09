@@ -21,6 +21,7 @@ object LinkFSS_IDBR {
       .config("spark.some.config.option", "some-value")
       .getOrCreate()
 
+   /*
     val idbr = spark.read.load("idbr0")
 
     val fss = spark.read.load("fss0")
@@ -30,6 +31,17 @@ object LinkFSS_IDBR {
     val fss_idbr = fss.join(idbr,joinExpr)
 
     println("No of fss records:"+fss.count())
+    */
+
+    val idbr = spark.read.load("idbrAll")
+
+    val fss = spark.read.load("fss0")
+
+    val joinExpr = fss.col("RUReference") === idbr.col("ruref")
+
+    val fss_idbr = fss.join(idbr,joinExpr)
+
+    println("No of fss_idbr records:"+fss_idbr.count())
 
 
 
