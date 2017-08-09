@@ -1,10 +1,10 @@
 package uk.gov.ons.dsc.fin
 
-import org.apache.spark.ml.{Pipeline, PipelineStage}
 import org.apache.spark.ml.classification.RandomForestClassifier
 import org.apache.spark.ml.feature.{StringIndexer, VectorAssembler}
+import org.apache.spark.ml.{Pipeline, PipelineStage}
 import org.apache.spark.sql._
-import org.apache.spark.sql.functions.{avg, col, udf}
+import org.apache.spark.sql.functions.{col, udf}
 import org.apache.spark.sql.types.{DoubleType, StringType, StructField, StructType}
 
 object SIC_RF_RATIOS {
@@ -186,7 +186,8 @@ object SIC_RF_RATIOS {
         }
 
         //calculate the accuracy based on the number of correct cases
-        val accuracy: Double = fssPred.select(avg((col("numCorrect") / col("total")))).first().getDouble(0)
+        fssPred.createOrReplaceTempView("pred")
+        val accuracy: Double = spark.sql("select sum(numCorrect)/sum(total) as accuracy from pred").first.getDouble(0)
         //sace the case in a json file
         fssPred.write.mode("overwrite").json("RF_SIC_results/resRF_SIC_"+SICchars+"_" +"R"+ numRatios+"_"+fCols.mkString("_")+".json")
         //println("t4")
