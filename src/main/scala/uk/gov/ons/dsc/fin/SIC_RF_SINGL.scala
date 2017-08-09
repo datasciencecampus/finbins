@@ -101,7 +101,7 @@ object SIC_RF_SINGL {
     println ("Results for features:"+ fCols.mkString(",") )
 
 
-    val accuracy: Double = spark.sql("select sum(numCorrect)/sum(total) as accuracy").first.getDouble(0)
+    val accuracy: Double = spark.sql("select sum(numCorrect)/sum(total) as accuracy from pred").first.getDouble(0)
 
     println( " Accuracy for features:" + fCols.mkString(",") + " is:" + accuracy)
 
