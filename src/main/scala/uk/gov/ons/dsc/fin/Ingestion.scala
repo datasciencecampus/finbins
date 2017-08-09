@@ -42,6 +42,7 @@ object Ingestion {
                        .option("delimiter","|")
                        .load("fss.csv")
                        .drop("Region")
+                         .drop("Turnover")
 
     fss.write.mode(SaveMode.Overwrite).save("fss0")
 
