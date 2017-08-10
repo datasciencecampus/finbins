@@ -28,6 +28,7 @@ object SIC_RF_RATIOS {
   val indexer_label = new StringIndexer()
     .setInputCol("Sub_SIC")
     .setOutputCol("label")
+    .setHandleInvalid("skip")
 
 
 

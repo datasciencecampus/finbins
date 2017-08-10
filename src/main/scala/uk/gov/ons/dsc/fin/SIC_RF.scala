@@ -24,6 +24,7 @@ object SIC_RF {
   val indexer_label = new StringIndexer()
     .setInputCol("Sub_SIC")
     .setOutputCol("label")
+    .setHandleInvalid("skip")
 
 
 

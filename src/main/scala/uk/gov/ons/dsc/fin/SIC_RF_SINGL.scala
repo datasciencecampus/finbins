@@ -20,6 +20,7 @@ object SIC_RF_SINGL {
   val indexer_label = new StringIndexer()
     .setInputCol("Sub_SIC")
     .setOutputCol("label")
+    .setHandleInvalid("skip")
 
 
   //model
