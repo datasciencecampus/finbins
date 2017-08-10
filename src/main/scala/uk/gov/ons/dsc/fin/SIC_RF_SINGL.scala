@@ -68,13 +68,9 @@ object SIC_RF_SINGL {
 
     //Load and Prep data
     val fssIDBR = spark.read.load("fss_idbr")
-      .withColumnRenamed("C5","SIC")
-      .withColumnRenamed("C26","CompanyName")
-      .withColumnRenamed("C32","AddressLine1")
+      .withColumnRenamed("frosic2007","SIC")
       .withColumn("Sub_SIC", substrSIC (col("SIC")))
-      // .withColumn("features")
-      //   .withColumn("features",toVec4(fssIDBR(""),fssIDBR("")))
-      .dropDuplicates(Array("CompanyName"))
+     // .dropDuplicates(Array("CompanyName"))
       .na.fill(0)
 
     fssIDBR.createOrReplaceTempView("fss_idbr")

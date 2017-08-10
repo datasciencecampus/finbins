@@ -96,11 +96,9 @@ object SIC_RF_RATIOS {
 
     //Load and Prep data
     val fssIDBR = spark.read.load("fss_idbr")
-      .withColumnRenamed("C5","SIC")
-      .withColumnRenamed("C26","CompanyName")
-      .withColumnRenamed("C32","AddressLine1")
+      .withColumnRenamed("frosic2007","SIC")
       .withColumn("Sub_SIC", substrSIC (col("SIC")))
-      .dropDuplicates(Array("CompanyName"))
+     // .dropDuplicates(Array("CompanyName"))
       .na.fill(0)
 
     val featureCols = fssIDBR.dtypes.filter(f=>  f._2=="DoubleType").map(f=>f._1).filter(f=>f>=startCol )
