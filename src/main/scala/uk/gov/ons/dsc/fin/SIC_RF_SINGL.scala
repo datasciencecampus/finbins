@@ -72,11 +72,12 @@ object SIC_RF_SINGL {
       .withColumn("Sub_SIC", substrSIC (col("SIC")))
      // .dropDuplicates(Array("CompanyName"))
       .na.fill(0)
+      .filter("frosic2007 < 66666")
 
     fssIDBR.createOrReplaceTempView("fss_idbr")
     val Array(trainingData, testData) = fssIDBR.randomSplit(Array(0.90, 0.10))
-    trainingData.cache.count
-    testData.cache.count
+    trainingData.cache
+    testData.cache
 
     // configure the feature columns in the assembler
     assembler.setInputCols(fCols)

@@ -85,6 +85,7 @@ object SIC_RF {
       //   .withColumn("features",toVec4(fssIDBR(""),fssIDBR("")))
       //.dropDuplicates(Array("CompanyName"))
       .na.fill(0)
+      .filter("frosic2007 < 66666")
 
     val featureCols = fssIDBR.dtypes.filter(f=>  f._2=="DoubleType").map(f=>f._1).filter(f=>f>=startCol )
 

@@ -100,6 +100,7 @@ object SIC_RF_RATIOS {
       .withColumn("Sub_SIC", substrSIC (col("SIC")))
      // .dropDuplicates(Array("CompanyName"))
       .na.fill(0)
+      .filter("frosic2007 < 66666")
 
     val featureCols = fssIDBR.dtypes.filter(f=>  f._2=="DoubleType").map(f=>f._1).filter(f=>f>=startCol )
 
@@ -125,7 +126,7 @@ object SIC_RF_RATIOS {
       val fCols:Array[String]  = featuresCombIter.next()
 
       if (counter >= startPos && fCols != null && !fCols.isEmpty) {
-        println ("Processing:"+fCols.mkString(","))
+        println ("Processing:"+fCols.mkString(",")+" in "+ numRatios + " pairs of ratios")
 
 
         numRatios match {
@@ -206,7 +207,10 @@ object SIC_RF_RATIOS {
     resultDF.write.mode(SaveMode.Overwrite).save("SIC_predictions_features_"+numFeatures.toString+"_R"+numRatios+"_"+ numRatios +"_SIC"+SICchars)
 
     println("All done! Number of feature combinations saved:"+resultDF.count())
-    resultDF.show (25)
+    resultDF.show (25, false)
+
+    sys.exit
+
 
 
   }
