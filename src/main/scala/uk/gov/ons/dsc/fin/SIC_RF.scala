@@ -115,18 +115,22 @@ object SIC_RF {
         println ("Processing:"+fCols.mkString(","))
 
         assembler.setInputCols(fCols)
+        try {
+          //println("t1")
+          val fssPred = traingEval(Array(assembler, indexer_label, modelRF.setFeaturesCol("features")), trainingData, testData, spark.sqlContext)
+          fssPred.createOrReplaceTempView("pred")
+          val accuracy: Double = spark.sql("select sum(numCorrect)/sum(total) as accuracy from pred").first.getDouble(0)
 
-        //println("t1")
-        val fssPred = traingEval(Array(assembler, indexer_label, modelRF.setFeaturesCol("features")), trainingData, testData, spark.sqlContext)
-        fssPred.createOrReplaceTempView("pred")
-        val accuracy: Double = spark.sql("select sum(numCorrect)/sum(total) as accuracy from pred").first.getDouble(0)
+          //println("t3")
+          fssPred.write.mode("overwrite").json("RF_SIC_results/resRF_SIC_" + SICchars + "_" + fCols.mkString("_") + ".json")
+          //println("t4")
+          println("No:" + counter.toString + " accuracy for features:" + fCols.mkString(",") + " is:" + accuracy)
 
-        //println("t3")
-        fssPred.write.mode("overwrite").json("RF_SIC_results/resRF_SIC_"+SICchars+"_" +fCols.mkString("_")+".json")
-        //println("t4")
-        println("No:" + counter.toString + " accuracy for features:" + fCols.mkString(",") + " is:" + accuracy)
-
-        output = output :+ Row(fCols.mkString(","), accuracy)
+          output = output :+ Row(fCols.mkString(","), accuracy)
+        }
+         catch {
+           case e:Exception => ("exception caught: "+e)
+         }
       }
       counter += 1
 
