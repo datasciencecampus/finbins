@@ -129,7 +129,7 @@ object SIC_RF {
           output = output :+ Row(fCols.mkString(","), accuracy)
         }
          catch {
-           case e:Exception => ("exception caught: "+e)
+           case e:Exception => println("exception caught: "+e);
          }
       }
       counter += 1

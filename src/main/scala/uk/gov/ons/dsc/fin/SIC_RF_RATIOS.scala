@@ -166,34 +166,39 @@ object SIC_RF_RATIOS {
 
         }
 
+        try {
+          val fssPred = numRatios match {
+            case 0 => {
+              traingEval(Array(assembler, indexer_label, modelRF.setFeaturesCol("features")), trainingData, testData, spark.sqlContext)
+            }
+            case 1 => {
+              traingEval(Array(featureTransformer1, assembler, indexer_label, modelRF.setFeaturesCol("features")), trainingData, testData, spark.sqlContext)
+            }
+            case 2 => {
+              traingEval(Array(featureTransformer1, featureTransformer2, assembler, indexer_label, modelRF.setFeaturesCol("features")), trainingData, testData, spark.sqlContext)
+            }
+            case 3 => {
+              traingEval(Array(featureTransformer1, featureTransformer2, featureTransformer3, assembler, indexer_label, modelRF.setFeaturesCol("features")), trainingData, testData, spark.sqlContext)
+            }
+            case _ => { // ingnore the ratios
+              traingEval(Array(assembler, indexer_label, modelRF.setFeaturesCol("features")), trainingData, testData, spark.sqlContext)
+            }
+          }
 
-        val fssPred = numRatios match {
-          case 0 => {
-             traingEval(Array(assembler, indexer_label, modelRF.setFeaturesCol("features")), trainingData, testData, spark.sqlContext)
-          }
-          case 1 => {
-             traingEval(Array(featureTransformer1,assembler, indexer_label, modelRF.setFeaturesCol("features")), trainingData, testData, spark.sqlContext)
-          }
-          case 2 => {
-             traingEval(Array(featureTransformer1,featureTransformer2,assembler, indexer_label, modelRF.setFeaturesCol("features")), trainingData, testData, spark.sqlContext)
-          }
-          case 3 => {
-            traingEval(Array(featureTransformer1,featureTransformer2,featureTransformer3,assembler, indexer_label, modelRF.setFeaturesCol("features")), trainingData, testData, spark.sqlContext)
-          }
-          case _ => { // ingnore the ratios
-            traingEval(Array(assembler, indexer_label, modelRF.setFeaturesCol("features")), trainingData, testData, spark.sqlContext)
-          }
+          //calculate the accuracy based on the number of correct cases
+          fssPred.createOrReplaceTempView("pred")
+          val accuracy: Double = spark.sql("select sum(numCorrect)/sum(total) as accuracy from pred").first.getDouble(0)
+          //sace the case in a json file
+          fssPred.write.mode("overwrite").json("RF_SIC_results/resRF_SIC_" + SICchars + "_" + "R" + numRatios + "_" + fCols.mkString("_") + ".json")
+          //println("t4")
+          println("No:" + counter.toString + " accuracy for features:" + fCols.mkString(",") + " is:" + accuracy)
+
+          output = output :+ Row(fCols.mkString(","), accuracy)
         }
-
-        //calculate the accuracy based on the number of correct cases
-        fssPred.createOrReplaceTempView("pred")
-        val accuracy: Double = spark.sql("select sum(numCorrect)/sum(total) as accuracy from pred").first.getDouble(0)
-        //sace the case in a json file
-        fssPred.write.mode("overwrite").json("RF_SIC_results/resRF_SIC_"+SICchars+"_" +"R"+ numRatios+"_"+fCols.mkString("_")+".json")
-        //println("t4")
-        println("No:" + counter.toString + " accuracy for features:" + fCols.mkString(",") + " is:" + accuracy)
-
-        output = output :+ Row(fCols.mkString(","), accuracy)
+        catch
+          {
+            case e:Exception => println("exception caught: " + e);
+          }
       }
       counter += 1
 
