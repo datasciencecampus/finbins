@@ -67,16 +67,9 @@ object SIC_RF_NORM {
     val numRatios = 1
 
 
-    if (numRatios*2 > numFeatures){
-      println("Number of ratios too high for the number of features. Exiting ...")
-      sys.exit()
-
-    }
-
-
 
     println("Running with: numFeatures:"+numFeatures+ " StartPos: "+startPos+ " endPos:"+endComb+ " SIC_chars:"+SICchars + " Start col:"+ startCol + " number of Ratios:"+numRatios)
-    println("First two features are computed in ratio R1, second two in R2 ...." )
+    println("All features are devided by selected column ...." )
 
 
     //init Session
@@ -232,7 +225,7 @@ object SIC_RF_NORM {
     val resultDF = spark.createDataFrame(parallelizedRows,resSchema).sort(col("accuracy").desc)
 
     // save the resulting table
-    resultDF.write.mode(SaveMode.Overwrite).save("SIC_predictions_features_"+numFeatures.toString+"_R"+numRatios+"_"+ numRatios +"_SIC"+SICchars)
+    resultDF.write.mode(SaveMode.Overwrite).save("SIC_predictions_features_normalised_"+numFeatures.toString+"_R"+numRatios+"_"+ numRatios +"_SIC"+SICchars)
 
     println("All done! Number of feature combinations saved:"+resultDF.count())
     resultDF.show (25, false)
@@ -267,6 +260,6 @@ object SIC_RF_NORM {
     // sqlContext.sql("select SIC, label, count(case when label = prediction then 1 end) as numCorrect, count(*) as total from predictions group by  SIC, label, prediction order by SIC, prediction asc ").repartition((1))
 
   }
-  
+
 }
 
