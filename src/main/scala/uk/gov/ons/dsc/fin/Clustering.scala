@@ -18,6 +18,7 @@ object Clustering {
   val modelKMeans =  new KMeans()
                     .setK(5)
                     .setSeed(1L)
+                    .setPredictionCol("clusterNo")
 
 
 
@@ -59,7 +60,7 @@ object Clustering {
     //  .filter("frosic2007 < 66666")
 
 
-    val fssIDBR = assembler.transform(fssIDBRraw)
+    val fssIDBR = assembler.transform(fssIDBRraw).cache
     val model = modelKMeans.fit(fssIDBR)
 
     // Evaluate clustering by computing Within Set Sum of Squared Errors.
