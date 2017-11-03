@@ -80,7 +80,7 @@ object SIC_RF {
     val substrSIC = udf (subsringFn _)
 
     //Load and Prep data
-    val fssIDBR = spark.read.load("fss_idbr")
+    val fssIDBR = spark.read.load("/tactical_prod1/raw/data_science_campus/fin_bins/fss_idbr")
       .withColumnRenamed("frosic2007","SIC")
       .withColumn("Sub_SIC", substrSIC (col("SIC")))
       //   .withColumn("features",toVec4(fssIDBR(""),fssIDBR("")))
